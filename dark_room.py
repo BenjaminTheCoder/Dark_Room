@@ -6,6 +6,7 @@ FPS = 120
 
 vel = 1
 
+gampad = 0
 
 @dataclass
 class Circle:
@@ -26,23 +27,30 @@ character = pr.load_texture("Assets/Dark_room_ball.png")
 while not pr.window_should_close():
 
 
-
     if pr.is_key_down(pr.KeyboardKey.KEY_F):
         pr.toggle_fullscreen()
 
 
     # Player
-    if pr.is_key_down(pr.KeyboardKey.KEY_W):
+    if pr.is_key_down(pr.KeyboardKey.KEY_W) or pr.is_key_down(pr.KeyboardKey.KEY_UP):
         player.y -= vel
-    if pr.is_key_down(pr.KeyboardKey.KEY_S):
+    if pr.get_gamepad_axis_movement(0, pr.GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < 0.01:
+        player.y -= vel
+    if pr.is_key_down(pr.KeyboardKey.KEY_S) or pr.is_key_down(pr.KeyboardKey.KEY_DOWN):
+        player.y += vel
+    if pr.get_gamepad_axis_movement(0, pr.GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > -0.01:
         player.y += vel
     if player.y + player.r <= WINDOWHEIGHT:
         player.y += vel
     if player.y - player.r > 0:
         player.y -= vel    
-    if pr.is_key_down(pr.KeyboardKey.KEY_A):
+    if pr.is_key_down(pr.KeyboardKey.KEY_A) or pr.is_key_down(pr.KeyboardKey.KEY_LEFT):
         player.x -= vel
-    if pr.is_key_down(pr.KeyboardKey.KEY_D):
+    if pr.get_gamepad_axis_movement(0, pr.GamepadAxis.GAMEPAD_AXIS_LEFT_X) < 0.01:
+        player.x -= vel
+    if pr.is_key_down(pr.KeyboardKey.KEY_D) or pr.is_key_down(pr.KeyboardKey.KEY_RIGHT):
+        player.x += vel
+    if pr.get_gamepad_axis_movement(0, pr.GamepadAxis.GAMEPAD_AXIS_LEFT_X) > -0.01:
         player.x += vel
     if player.x - player.r < 0:
        player.x += vel
