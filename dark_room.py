@@ -4,7 +4,7 @@ WINDOWWIDTH = 800
 WINDOWHEIGHT = 600
 FPS = 120
 
-move = 1
+vel = 1
 
 gampad = 0
 
@@ -13,10 +13,8 @@ class Circle:
     x: float
     y: float
     r: int
-    vel_x: float
-    vel_y: float
 
-player = Circle(64, 64, 16, 0, 0)
+player = Circle(64, 64, 16)
 
 test_wall  = pr.Rectangle(300, 200, 100, 100)
 
@@ -35,40 +33,48 @@ while not pr.window_should_close():
 
     # Player
     if pr.is_key_down(pr.KeyboardKey.KEY_W) or pr.is_key_down(pr.KeyboardKey.KEY_UP):
-        player.vel_y = move
+        player.y -= vel
+    if pr.is_key_released(pr.KeyboardKey.KEY_W) or pr.is_key_released(pr.KeyboardKey.KEY_UP):
+        player.y -= vel*5
     if pr.get_gamepad_axis_movement(0, pr.GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < 0.01:
-        player.vel_y -= move
+        player.y -= vel
     if pr.is_key_down(pr.KeyboardKey.KEY_S) or pr.is_key_down(pr.KeyboardKey.KEY_DOWN):
-        player.vel_y += move
+        player.y += vel
+    if pr.is_key_released(pr.KeyboardKey.KEY_S) or pr.is_key_released(pr.KeyboardKey.KEY_DOWN):
+        player.y -= vel*5
     if pr.get_gamepad_axis_movement(0, pr.GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > -0.01:
-        player.vel_y += move
+        player.y += vel
     if player.y + player.r <= WINDOWHEIGHT:
-        player.vel_y += move
+        player.y += vel
     if player.y - player.r > 0:
-        player.vel_y -= move    
+        player.y -= vel    
     if pr.is_key_down(pr.KeyboardKey.KEY_A) or pr.is_key_down(pr.KeyboardKey.KEY_LEFT):
-        player.vel_x -= move
+        player.x -= vel
+    if pr.is_key_released(pr.KeyboardKey.KEY_A) or pr.is_key_released(pr.KeyboardKey.KEY_LEFT):
+        player.x -= vel*5
     if pr.get_gamepad_axis_movement(0, pr.GamepadAxis.GAMEPAD_AXIS_LEFT_X) < 0.01:
-        player.vel_x -= move
+        player.x -= vel
     if pr.is_key_down(pr.KeyboardKey.KEY_D) or pr.is_key_down(pr.KeyboardKey.KEY_RIGHT):
-        player.vel_x += move
+        player.x += vel
+    if pr.is_key_released(pr.KeyboardKey.KEY_D) or pr.is_key_released(pr.KeyboardKey.KEY_RIGHT):
+        player.x += vel*5
     if pr.get_gamepad_axis_movement(0, pr.GamepadAxis.GAMEPAD_AXIS_LEFT_X) > -0.01:
-        player.vel_x += move
+        player.x += vel
     if player.x - player.r < 0:
-       player.vel_x += move
-    if player.vel_x + player.r>=WINDOWWIDTH:
-       player.x -= move
+       player.x += vel
+    if player.x + player.r>=WINDOWWIDTH:
+       player.x -= vel
 
     
 
     if player.x < (test_wall.x + test_wall.width + player.r) and player.x > (test_wall.x + player.r) and player.y > test_wall.y and player.y < test_wall.y + test_wall.height:
-        player.vel_x += move
+        player.x += vel
     if player.x > (test_wall.x - player.r) and player.x < (test_wall.x + player.r) and player.y > test_wall.y and player.y < test_wall.y + test_wall.height:
-        player.vel_x -= move
+        player.x -= vel
     if player.y < (test_wall.y + test_wall.height + player.r) and player.y > (test_wall.y + player.r) and player.x > test_wall.x and player.x < test_wall.x + test_wall.width:
-        player.vel_y += move
+        player.y += vel
     if player.y > (test_wall.y - player.r) and player.y < (test_wall.y + player.r) and player.x > test_wall.x and player.x < test_wall.x + test_wall.width:
-        player.vel_y -= move
+        player.y -= vel
 
 
 
