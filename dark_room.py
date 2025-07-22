@@ -13,10 +13,14 @@ class Circle:
     x: float
     y: float
     r: int
+    vx: float
+    vy: float
 
-player = Circle(64, 64, 16)
+player = Circle(64, 64, 16, 0.1, 0.1)
 
 test_wall  = pr.Rectangle(300, 200, 100, 100)
+
+slip = 0.002
 
 pr.init_window(WINDOWWIDTH, WINDOWHEIGHT, "Dark Room")
 
@@ -33,15 +37,11 @@ while not pr.window_should_close():
 
     # Player
     if pr.is_key_down(pr.KeyboardKey.KEY_W) or pr.is_key_down(pr.KeyboardKey.KEY_UP):
-        player.y -= vel
-    if pr.is_key_released(pr.KeyboardKey.KEY_W) or pr.is_key_released(pr.KeyboardKey.KEY_UP):
-        player.y -= vel*5
+        player.vy += slip
     if pr.get_gamepad_axis_movement(0, pr.GamepadAxis.GAMEPAD_AXIS_LEFT_Y) < 0.01:
         player.y -= vel
     if pr.is_key_down(pr.KeyboardKey.KEY_S) or pr.is_key_down(pr.KeyboardKey.KEY_DOWN):
-        player.y += vel
-    if pr.is_key_released(pr.KeyboardKey.KEY_S) or pr.is_key_released(pr.KeyboardKey.KEY_DOWN):
-        player.y -= vel*5
+        player.vy -= slip
     if pr.get_gamepad_axis_movement(0, pr.GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > -0.01:
         player.y += vel
     if player.y + player.r <= WINDOWHEIGHT:
@@ -49,15 +49,11 @@ while not pr.window_should_close():
     if player.y - player.r > 0:
         player.y -= vel    
     if pr.is_key_down(pr.KeyboardKey.KEY_A) or pr.is_key_down(pr.KeyboardKey.KEY_LEFT):
-        player.x -= vel
-    if pr.is_key_released(pr.KeyboardKey.KEY_A) or pr.is_key_released(pr.KeyboardKey.KEY_LEFT):
-        player.x -= vel*5
+        player.vx += slip
     if pr.get_gamepad_axis_movement(0, pr.GamepadAxis.GAMEPAD_AXIS_LEFT_X) < 0.01:
         player.x -= vel
     if pr.is_key_down(pr.KeyboardKey.KEY_D) or pr.is_key_down(pr.KeyboardKey.KEY_RIGHT):
-        player.x += vel
-    if pr.is_key_released(pr.KeyboardKey.KEY_D) or pr.is_key_released(pr.KeyboardKey.KEY_RIGHT):
-        player.x += vel*5
+        player.vx -= slip
     if pr.get_gamepad_axis_movement(0, pr.GamepadAxis.GAMEPAD_AXIS_LEFT_X) > -0.01:
         player.x += vel
     if player.x - player.r < 0:
@@ -65,7 +61,8 @@ while not pr.window_should_close():
     if player.x + player.r>=WINDOWWIDTH:
        player.x -= vel
 
-    
+    player.x += -player.vx
+    player.y += -player.vy
 
     if player.x < (test_wall.x + test_wall.width + player.r) and player.x > (test_wall.x + player.r) and player.y > test_wall.y and player.y < test_wall.y + test_wall.height:
         player.x += vel
