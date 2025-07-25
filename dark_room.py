@@ -1,5 +1,6 @@
 import pyray as pr
 from dataclasses import dataclass, field
+import random as rand
 
 WINDOWWIDTH = 800
 WINDOWHEIGHT = 600
@@ -18,14 +19,20 @@ class Circle:
 
 player = Circle(64, 64, 16, 0, 0)
 
-test_wall  = pr.Rectangle(300, 200, 100, 100)
+# test_wall  = pr.Rectangle(300, 200, 100, 100)
 
+walls: list[pr.Rectangle] = []
 
 pr.init_window(WINDOWWIDTH, WINDOWHEIGHT, "Dark Room")
 
 pr.set_target_fps(FPS)
 
 character = pr.load_texture("Assets/Dark_room_ball.png")
+
+
+for i in range(100):
+        wall = pr.Rectangle(rand.randint(75, 750), rand.randint(75, 550), rand.randint(30, 50), rand.randint(30, 50))
+        walls.append(wall)
 
 while not pr.window_should_close():
 
@@ -63,18 +70,22 @@ while not pr.window_should_close():
     player.x += player.vx
     player.y += player.vy
 
-    if player.x < (test_wall.x + test_wall.width + player.r) and player.x > (test_wall.x + player.r) and player.y > test_wall.y and player.y < test_wall.y + test_wall.height:
-        player.vx *= -1
-    if player.x > (test_wall.x - player.r) and player.x < (test_wall.x + player.r) and player.y > test_wall.y and player.y < test_wall.y + test_wall.height:
-        player.vx *= -1
-    if player.y < (test_wall.y + test_wall.height + player.r) and player.y > (test_wall.y + player.r) and player.x > test_wall.x and player.x < test_wall.x + test_wall.width:
-        player.vy *= -1
-    if player.y > (test_wall.y - player.r) and player.y < (test_wall.y + player.r) and player.x > test_wall.x and player.x < test_wall.x + test_wall.width:
-        player.vy *= -1
+    
+
+    for wall in walls:
+        if player.x < (wall.x + wall.width + player.r) and player.x > (wall.x + player.r) and player.y > wall.y and player.y < wall.y + wall.height:
+            player.vx *= -1
+        if player.x > (wall.x - player.r) and player.x < (wall.x + player.r) and player.y > wall.y and player.y < wall.y + wall.height:
+            player.vx *= -1
+        if player.y < (wall.y + wall.height + player.r) and player.y > (wall.y + player.r) and player.x > wall.x and player.x < wall.x + wall.width:
+            player.vy *= -1
+        if player.y > (wall.y - player.r) and player.y < (wall.y + player.r) and player.x > wall.x and player.x < wall.x + wall.width:
+            player.vy *= -1
 
     pr.begin_drawing()
     pr.clear_background((144, 213, 255))
-    pr.draw_rectangle(int(test_wall.x), int(test_wall.y), int(test_wall.width), int(test_wall.height), pr.BLACK)
+    for wall in walls:
+        pr.draw_rectangle(int(wall.x), int(wall.y), int(wall.width), int(wall.height), pr.BLACK)
     # pr.draw_circle(int(player.x), int(player.y), player.r, pr.BLACK)
     pr.draw_texture(character, int(player.x - player.r), int(player.y - player.r), pr.WHITE)
     pr.end_drawing()
