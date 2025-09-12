@@ -1,5 +1,6 @@
 import pyray as pr
 from labyrinth import maze # type: ignore
+from labyrinth.grid import Cell, Direction, Grid # type: ignore
 from dataclasses import dataclass, field
 import random as rand
 
@@ -29,21 +30,59 @@ walls = []
 nodes_: list[Circle] = []
 
 
+Line = tuple[pr.Vector2, pr.Vector2]
+
+def maze_to_lines(maze: maze.Maze, line_length: int) -> list[Line]:
+    lines: list[Line] = []
+    # print('maze', maze._grid, maze.walls)
+    for row in range(maze.height):
+        for column in range(maze.width):
+            cell = maze[row, column]
+            print('row', row, 'col', column, 'cell', cell, 'open_walls', cell.open_walls)
+            p1 = (column * line_length, row * line_length)
+            p2 = (column * line_length * 0.9, (row + 1) * line_length * 0.9)
+            point1 = pr.Vector2(p1[0], p1[1])
+            point2 = pr.Vector2(p2[0], p2[1])
+            print('points', (p1, p2))
+            lines.append((point1, point2))
+            break
+        #     if not Direction.E in cell.open_walls:
+        #         point1 = pr.Vector2(column * line_length, row * line_length)
+        #         point2 = pr.Vector2(column * line_length, (row + 1) * line_length)
+        #         lines.append((point1, point2))
+        # for column in range(maze.width):
+        #     if not Direction.S in maze[row, column].open_walls:
+        #         point1 = pr.Vector2(column * line_length, row * line_length)
+        #         point2 = pr.Vector2((column + 1) * line_length, row * line_length)
+        #         lines.append((point1, point2))
+    return lines
+
 pr.init_window(WINDOWWIDTH, WINDOWHEIGHT, "Dark Room")
 
 pr.set_target_fps(FPS)
 
 character = pr.load_texture("Assets/Dark_room_ball.png")
 
-m = maze.Maze(600, 400)
+m = maze.Maze(12, 10)
+LINE_LENGTH = 50 
+
+m_lines = maze_to_lines(m, LINE_LENGTH)
 
 nodes = list(m._grid.graph.vertices)
 
-edges = list(m.walls)
+edges = list(m._grid.graph.edges)
+print('edges', edges)
 
 for node in nodes:
-        node = Circle(node.column*50, node.row*50, 3, 0, 0)
+        node = Circle((node.column*LINE_LENGTH)+(LINE_LENGTH//2), (node.row*LINE_LENGTH)+(LINE_LENGTH//2), 2, 0, 0)
         nodes_.append(node)
+
+edge_lines = []
+for edge in edges:
+    cell1, cell2 = edge
+    edge_p1 = pr.Vector2((cell1.column*LINE_LENGTH)+(LINE_LENGTH//2), (cell1.row*LINE_LENGTH)+(LINE_LENGTH//2))
+    edge_p2 = pr.Vector2((cell2.column*LINE_LENGTH)+(LINE_LENGTH//2), (cell2.row*LINE_LENGTH)+(LINE_LENGTH//2))
+    edge_lines.append((edge_p1, edge_p2))
 
 
 for edge in edges:
@@ -101,13 +140,22 @@ while not pr.window_should_close():
     pr.begin_drawing()
     pr.clear_background((144, 213, 255))
     
-    for wall in walls:
-        # node1 = wall[0]
-        # node2 = wall[1]
-        node1, node2 = wall
-        vec1 = pr.Vector2(node1.column * 50, node1.row * 50)
-        vec2 = pr.Vector2(node2.column * 50, node2.row * 50)
-        pr.draw_line_ex(vec1, vec2, 2, pr.BLUE,)
+    # for wall in walls:
+    #     # node1 = wall[0]
+    #     # node2 = wall[1]
+    #     node1, node2 = wall
+    #     vec1 = pr.Vector2(node1.column * 20, node1.row * 20)
+    #     vec2 = pr.Vector2(node2.column * 20, node2.row * 20)
+    #     pr.draw_line_ex(vec1, vec2, 2, pr.BLUE,)
+
+    # for m_line in m_lines:
+    #     point1, point2 = m_line
+    #     pr.draw_line_ex(point1, point2, 6, pr.BLUE)
+
+    for edge_line in edge_lines:
+        point1, point2 = edge_line
+        pr.draw_line_ex(point1, point2, 6, pr.GREEN)
+
 
     for node in nodes_:
         pr.draw_circle(node.x, node.y, node.r, pr.BLACK)
