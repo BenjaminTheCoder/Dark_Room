@@ -1,6 +1,7 @@
 import pyray as pr
-from labyrinth import maze # type: ignore
-from labyrinth.grid import Cell, Direction, Grid # type: ignore
+# from labyrinth import maze # type: ignore
+# from labyrinth.grid import Cell, Direction, Grid # type: ignore
+from maze_generator_jotbleach import MazeGenerator
 from dataclasses import dataclass, field
 import random as rand
 
@@ -25,27 +26,29 @@ class Circle:
 player = Circle(64, 64, 16, 0, 0)
 
 # test_wall  = pr.Rectangle(300, 200, 100, 100)
-
-walls = []
+m = (5, 5)
+#   
 nodes_: list[Circle] = []
+mazegen = MazeGenerator(width=m[0], height=m[1], seed=None)
+mazegen.generate_maze()
 
 
-Line = tuple[pr.Vector2, pr.Vector2]
+# Line = tuple[pr.Vector2, pr.Vector2]
 
-def maze_to_lines(maze: maze.Maze, line_length: int) -> list[Line]:
-    lines: list[Line] = []
-    # print('maze', maze._grid, maze.walls)
-    for row in range(maze.height):
-        for column in range(maze.width):
-            cell = maze[row, column]
-            print('row', row, 'col', column, 'cell', cell, 'open_walls', cell.open_walls)
-            p1 = (column * line_length, row * line_length)
-            p2 = (column * line_length * 0.9, (row + 1) * line_length * 0.9)
-            point1 = pr.Vector2(p1[0], p1[1])
-            point2 = pr.Vector2(p2[0], p2[1])
-            print('points', (p1, p2))
-            lines.append((point1, point2))
-            break
+# def maze_to_lines(maze: maze, line_length: int) -> list[Line]:
+#     lines: list[Line] = []
+#     # print('maze', maze._grid, maze.walls)
+#     for row in range(maze.height):
+#         for column in range(maze.width):
+#             cell = maze[row, column]
+#             print('row', row, 'col', column, 'cell', cell, 'open_walls', cell.open_walls)
+#             p1 = (column * line_length, row * line_length)
+#             p2 = (column * line_length * 0.9, (row + 1) * line_length * 0.9)
+#             point1 = pr.Vector2(p1[0], p1[1])
+#             point2 = pr.Vector2(p2[0], p2[1])
+#             print('points', (p1, p2))
+#             lines.append((point1, point2))
+#             break
         #     if not Direction.E in cell.open_walls:
         #         point1 = pr.Vector2(column * line_length, row * line_length)
         #         point2 = pr.Vector2(column * line_length, (row + 1) * line_length)
@@ -55,7 +58,7 @@ def maze_to_lines(maze: maze.Maze, line_length: int) -> list[Line]:
         #         point1 = pr.Vector2(column * line_length, row * line_length)
         #         point2 = pr.Vector2((column + 1) * line_length, row * line_length)
         #         lines.append((point1, point2))
-    return lines
+    # return lines
 
 pr.init_window(WINDOWWIDTH, WINDOWHEIGHT, "Dark Room")
 
@@ -63,31 +66,25 @@ pr.set_target_fps(FPS)
 
 character = pr.load_texture("Assets/Dark_room_ball.png")
 
-m = maze.Maze(12, 10)
-LINE_LENGTH = 50 
-
-m_lines = maze_to_lines(m, LINE_LENGTH)
-
-nodes = list(m._grid.graph.vertices)
-
-edges = list(m._grid.graph.edges)
-print('edges', edges)
-
-for node in nodes:
-        node = Circle((node.column*LINE_LENGTH)+(LINE_LENGTH//2), (node.row*LINE_LENGTH)+(LINE_LENGTH//2), 2, 0, 0)
-        nodes_.append(node)
-
-edge_lines = []
-for edge in edges:
-    cell1, cell2 = edge
-    edge_p1 = pr.Vector2((cell1.column*LINE_LENGTH)+(LINE_LENGTH//2), (cell1.row*LINE_LENGTH)+(LINE_LENGTH//2))
-    edge_p2 = pr.Vector2((cell2.column*LINE_LENGTH)+(LINE_LENGTH//2), (cell2.row*LINE_LENGTH)+(LINE_LENGTH//2))
-    edge_lines.append((edge_p1, edge_p2))
+LINE_LENGTH = 32 
 
 
-for edge in edges:
-        wall = (edge)
-        walls.append(wall)
+
+# for node in nodes:
+#         node = Circle((node.column*LINE_LENGTH)+(LINE_LENGTH//2), (node.row*LINE_LENGTH)+(LINE_LENGTH//2), 2, 0, 0)
+#         nodes_.append(node)
+
+# edge_lines = []
+# for edge in edges:
+#     cell1, cell2 = edge
+#     edge_p1 = pr.Vector2((cell1.column*LINE_LENGTH)+(LINE_LENGTH//2), (cell1.row*LINE_LENGTH)+(LINE_LENGTH//2))
+#     edge_p2 = pr.Vector2((cell2.column*LINE_LENGTH)+(LINE_LENGTH//2), (cell2.row*LINE_LENGTH)+(LINE_LENGTH//2))
+#     edge_lines.append((edge_p1, edge_p2))
+
+
+# for edge in edges:
+#         wall = (edge)
+#         walls.append(wall)
 
 while not pr.window_should_close():
 
@@ -140,6 +137,11 @@ while not pr.window_should_close():
     pr.begin_drawing()
     pr.clear_background((144, 213, 255))
     
+
+    # for i in mazegen.maze:
+    #     if i == 1:
+            # pr.draw_rectangle(LINE_LENGTH, LINE_LENGTH, pr.BLACK)
+
     # for wall in walls:
     #     # node1 = wall[0]
     #     # node2 = wall[1]
@@ -152,14 +154,15 @@ while not pr.window_should_close():
     #     point1, point2 = m_line
     #     pr.draw_line_ex(point1, point2, 6, pr.BLUE)
 
-    for edge_line in edge_lines:
-        point1, point2 = edge_line
-        pr.draw_line_ex(point1, point2, 6, pr.GREEN)
+    # for edge_line in edge_lines:
+    #     point1, point2 = edge_line
+    #     pr.draw_line_ex(point1, point2, 6, pr.GREEN)
 
 
-    for node in nodes_:
-        pr.draw_circle(node.x, node.y, node.r, pr.BLACK)
+    # for node in nodes_:
+    #     pr.draw_circle(node.x, node.y, node.r, pr.BLACK)
 
     pr.draw_texture(character, int(player.x - player.r), int(player.y - player.r), pr.WHITE)
     pr.end_drawing()
+print(mazegen.__dict__)
 pr.close_window()
