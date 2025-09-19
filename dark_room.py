@@ -3,6 +3,7 @@ import pyray as pr
 # from labyrinth.grid import Cell, Direction, Grid # type: ignore
 from maze_generator_jotbleach import MazeGenerator
 from dataclasses import dataclass, field
+import pprint
 import random as rand
 
 
@@ -26,7 +27,7 @@ class Circle:
 player = Circle(64, 64, 16, 0, 0)
 
 # test_wall  = pr.Rectangle(300, 200, 100, 100)
-m = (5, 5)
+m = (16, 12)
 #   
 nodes_: list[Circle] = []
 mazegen = MazeGenerator(width=m[0], height=m[1], seed=None)
@@ -86,6 +87,10 @@ LINE_LENGTH = 32
 #         wall = (edge)
 #         walls.append(wall)
 
+
+row = mazegen.maze[0]
+
+
 while not pr.window_should_close():
 
 
@@ -134,14 +139,20 @@ while not pr.window_should_close():
     #     if player.y > (wall.y - player.r) and player.y < (wall.y + player.r) and player.x > wall.x and player.x < wall.x + wall.width:
     #         player.vy *= -1
 
+
+    
+    for i in range(len(row)):
+        print(row[3])
+        if row[i] == 1:
+            pr.draw_rectangle(i*50, 0, LINE_LENGTH, LINE_LENGTH, pr.BLACK)
+
+  
+
     pr.begin_drawing()
     pr.clear_background((144, 213, 255))
     
 
-    # for i in mazegen.maze:
-    #     if i == 1:
-            # pr.draw_rectangle(LINE_LENGTH, LINE_LENGTH, pr.BLACK)
-
+    
     # for wall in walls:
     #     # node1 = wall[0]
     #     # node2 = wall[1]
@@ -159,10 +170,11 @@ while not pr.window_should_close():
     #     pr.draw_line_ex(point1, point2, 6, pr.GREEN)
 
 
+
     # for node in nodes_:
     #     pr.draw_circle(node.x, node.y, node.r, pr.BLACK)
 
     pr.draw_texture(character, int(player.x - player.r), int(player.y - player.r), pr.WHITE)
     pr.end_drawing()
-print(mazegen.__dict__)
+pprint.pprint(mazegen.__dict__)
 pr.close_window()
