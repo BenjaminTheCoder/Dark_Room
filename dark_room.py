@@ -140,13 +140,11 @@ while not pr.window_should_close():
     #         player.vy *= -1
 
 
-    
-    for i in range(len(row)):
-        print(row[3])
-        if row[i] == 1:
-            pr.draw_rectangle(i*50, 0, LINE_LENGTH, LINE_LENGTH, pr.BLACK)
-
-  
+    for i in range(len(mazegen.maze[0])):
+        for c in range(0, 13):
+            print(i, c)
+            if mazegen.maze[c][i] == 1:
+                pr.draw_rectangle(i*LINE_LENGTH, c*LINE_LENGTH, LINE_LENGTH, LINE_LENGTH, pr.BLACK)  
 
     pr.begin_drawing()
     pr.clear_background((144, 213, 255))
