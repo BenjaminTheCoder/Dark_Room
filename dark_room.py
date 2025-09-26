@@ -124,7 +124,7 @@ while not pr.window_should_close():
     for wall in walls:
         pr.draw_rectangle(int(wall.x), int(wall.y), int(wall.width), int(wall.height), pr.BLACK)
 
-    pr.draw_texture(flashlight, int(player.x - player.r)-800, int(player.y - player.r)-600, pr.WHITE)
+    pr.draw_texture(flashlight, int(player.x - player.r)+16-800, int(player.y - player.r)+16-600, pr.WHITE)
     pr.draw_texture(character, int(player.x - player.r), int(player.y - player.r), pr.WHITE)
     pr.end_drawing()
 pprint.pprint(mazegen.__dict__)
