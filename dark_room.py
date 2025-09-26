@@ -41,7 +41,7 @@ pr.init_window(WINDOWWIDTH, WINDOWHEIGHT, "Dark Room")
 pr.set_target_fps(FPS)
 
 character = pr.load_texture("Assets/Dark_room_ball.png")
-
+flashlight = pr.load_texture("Assets/flashlight2.png")
 LINE_LENGTH = 40
 
 
@@ -124,7 +124,7 @@ while not pr.window_should_close():
     for wall in walls:
         pr.draw_rectangle(int(wall.x), int(wall.y), int(wall.width), int(wall.height), pr.BLACK)
 
-
+    pr.draw_texture(flashlight, int(player.x - player.r)-800, int(player.y - player.r)-600, pr.WHITE)
     pr.draw_texture(character, int(player.x - player.r), int(player.y - player.r), pr.WHITE)
     pr.end_drawing()
 pprint.pprint(mazegen.__dict__)
