@@ -5,15 +5,20 @@ from maze_generator_jotbleach import MazeGenerator
 from dataclasses import dataclass, field
 import pprint
 import random as rand
-
+import math
 
 
 
 WINDOWWIDTH = 800
-WINDOWHEIGHT = 600
+WINDOWHEIGHT = 800
+MAZE_WIDTH = 11 # TODO It only likes odd numbers ???
+MAZE_HEIGHT = 11
+CELL_WIDTH =  WINDOWWIDTH / MAZE_WIDTH
+CELL_HEIGHT = WINDOWHEIGHT / MAZE_HEIGHT
 FPS = 120
 SLIP = 0.0015
 GAMEPAD = 0
+
 
 
 @dataclass
@@ -27,10 +32,10 @@ class Circle:
 player = Circle(56, 17, 16, 0, 0)
 
 # test_wall  = pr.Rectangle(300, 200, 100, 100)
-m = (19, 15)
+# m = (WINDOWWIDTH//line_lengthx, WINDOWHEIGHT//line_lengthy)
 #   
 nodes_: list[Circle] = []
-mazegen = MazeGenerator(width=m[0], height=m[1], seed=None)
+mazegen = MazeGenerator(width=MAZE_WIDTH, height=MAZE_HEIGHT, seed=None)
 mazegen.generate_maze()
 
 
@@ -42,11 +47,10 @@ pr.set_target_fps(FPS)
 
 character = pr.load_texture("Assets/Dark_room_ball.png")
 flashlight = pr.load_texture("Assets/flashlight2.png")
-LINE_LENGTH = 40
 
 
 
-row = mazegen.maze[0]
+
 
 
 while not pr.window_should_close():
@@ -85,24 +89,13 @@ while not pr.window_should_close():
     player.x += player.vx
     player.y += player.vy
 
-    
-
-    # for wall in walls:
-    #     if player.x < (wall.x + wall.width + player.r) and player.x > (wall.x + player.r) and player.y > wall.y and player.y < wall.y + wall.height:
-    #         player.vx *= -1
-    #     if player.x > (wall.x - player.r) and player.x < (wall.x + player.r) and player.y > wall.y and player.y < wall.y + wall.height:
-    #         player.vx *= -1
-    #     if player.y < (wall.y + wall.height + player.r) and player.y > (wall.y + player.r) and player.x > wall.x and player.x < wall.x + wall.width:
-    #         player.vy *= -1
-    #     if player.y > (wall.y - player.r) and player.y < (wall.y + player.r) and player.x > wall.x and player.x < wall.x + wall.width:
-    #         player.vy *= -1
 
 
     walls = []
-    for i in range(len(mazegen.maze[0])):
-        for c in range(0, 15):
-            if mazegen.maze[c][i] == 1:
-                wall = pr.Rectangle(i*LINE_LENGTH, c*LINE_LENGTH, LINE_LENGTH, LINE_LENGTH)  
+    for i in range(0, MAZE_HEIGHT):
+        for c in range(0, MAZE_WIDTH):
+            if mazegen.maze[i][c] == 1:
+                wall = pr.Rectangle(c*CELL_WIDTH, i*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT)  
                 walls.append(wall)
 
     for wall in walls:
@@ -122,9 +115,9 @@ while not pr.window_should_close():
     pr.clear_background((144, 213, 255))
     
     for wall in walls:
-        pr.draw_rectangle(int(wall.x), int(wall.y), int(wall.width), int(wall.height), pr.BLACK)
+        pr.draw_rectangle(round(wall.x), round(wall.y), round(wall.width), round(wall.height), pr.BLACK)
 
-    pr.draw_texture(flashlight, int(player.x - player.r)+16-800, int(player.y - player.r)+16-600, pr.WHITE)
+    # pr.draw_texture(flashlight, int(player.x - player.r)+16-800, int(player.y - player.r)+16-600, pr.WHITE)
     pr.draw_texture(character, int(player.x - player.r), int(player.y - player.r), pr.WHITE)
     pr.end_drawing()
 pprint.pprint(mazegen.__dict__)
