@@ -10,8 +10,8 @@ import math
 
 
 WINDOWWIDTH = 800
-WINDOWHEIGHT = 800
-MAZE_WIDTH = 11 # TODO It only likes odd numbers ???
+WINDOWHEIGHT = 600
+MAZE_WIDTH = 11
 MAZE_HEIGHT = 11
 CELL_WIDTH =  WINDOWWIDTH / MAZE_WIDTH
 CELL_HEIGHT = WINDOWHEIGHT / MAZE_HEIGHT
@@ -19,6 +19,13 @@ FPS = 120
 SLIP = 0.0015
 GAMEPAD = 0
 
+
+def is_odd(number: int) -> bool:
+    return number % 2 == 1
+
+
+assert is_odd(MAZE_WIDTH), "MAZE_WIDTH must be odd!!"
+assert is_odd(MAZE_HEIGHT), "MAZE_HEIGHT must be odd!!"
 
 
 @dataclass
@@ -29,12 +36,14 @@ class Circle:
     vx: float
     vy: float
 
-player = Circle(56, 17, 16, 0, 0)
+mazegen = MazeGenerator(width=MAZE_WIDTH, height=MAZE_HEIGHT, seed=None)
+mazegen.generate_maze()
+
+player = Circle(65, 17, 16, 0, 0)
 
 # test_wall  = pr.Rectangle(300, 200, 100, 100)
 # m = (WINDOWWIDTH//line_lengthx, WINDOWHEIGHT//line_lengthy)
 #   
-nodes_: list[Circle] = []
 mazegen = MazeGenerator(width=MAZE_WIDTH, height=MAZE_HEIGHT, seed=None)
 mazegen.generate_maze()
 
@@ -47,7 +56,7 @@ pr.set_target_fps(FPS)
 
 character = pr.load_texture("Assets/Dark_room_ball.png")
 flashlight = pr.load_texture("Assets/flashlight2.png")
-
+end = pr.load_texture("Assets/Dark_room_end.png")
 
 
 
@@ -92,10 +101,10 @@ while not pr.window_should_close():
 
 
     walls = []
-    for i in range(0, MAZE_HEIGHT):
-        for c in range(0, MAZE_WIDTH):
-            if mazegen.maze[i][c] == 1:
-                wall = pr.Rectangle(c*CELL_WIDTH, i*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT)  
+    for row in range(0, MAZE_HEIGHT):
+        for col in range(0, MAZE_WIDTH):
+            if mazegen.maze[row][col] == 1:
+                wall = pr.Rectangle(col*CELL_WIDTH, row*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT)  
                 walls.append(wall)
 
     for wall in walls:
@@ -117,8 +126,9 @@ while not pr.window_should_close():
     for wall in walls:
         pr.draw_rectangle(round(wall.x), round(wall.y), round(wall.width), round(wall.height), pr.BLACK)
 
-    # pr.draw_texture(flashlight, int(player.x - player.r)+16-800, int(player.y - player.r)+16-600, pr.WHITE)
-    pr.draw_texture(character, int(player.x - player.r), int(player.y - player.r), pr.WHITE)
+    # pr.draw_texture(flashlight, round(player.x - player.r)+16-800, round(player.y - player.r)+16-600, pr.WHITE)
+    pr.draw_texture(character, round(player.x - player.r), round(player.y - player.r), pr.WHITE)
+    pr.draw_circle( mazegen.end_pos[0], WINDOWHEIGHT - mazegen.end_pos[1]*2, 16, pr.GREEN)
     pr.end_drawing()
 pprint.pprint(mazegen.__dict__)
 pr.close_window()
