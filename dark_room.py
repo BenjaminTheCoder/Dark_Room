@@ -11,8 +11,8 @@ import math
 
 WINDOWWIDTH = 800
 WINDOWHEIGHT = 600
-MAZE_WIDTH = 11
-MAZE_HEIGHT = 11
+MAZE_WIDTH = 17
+MAZE_HEIGHT = 15
 CELL_WIDTH =  WINDOWWIDTH / MAZE_WIDTH
 CELL_HEIGHT = WINDOWHEIGHT / MAZE_HEIGHT
 FPS = 120
@@ -128,7 +128,7 @@ while not pr.window_should_close():
 
     # pr.draw_texture(flashlight, round(player.x - player.r)+16-800, round(player.y - player.r)+16-600, pr.WHITE)
     pr.draw_texture(character, round(player.x - player.r), round(player.y - player.r), pr.WHITE)
-    pr.draw_circle( mazegen.end_pos[0], WINDOWHEIGHT - mazegen.end_pos[1]*2, 16, pr.GREEN)
+    pr.draw_circle( round(CELL_WIDTH*(mazegen.end_pos[1] + 0.5)), round(CELL_HEIGHT*(mazegen.end_pos[0] + 0.5)), 16, pr.GREEN)
     pr.end_drawing()
 pprint.pprint(mazegen.__dict__)
 pr.close_window()
