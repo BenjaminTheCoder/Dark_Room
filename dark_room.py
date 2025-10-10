@@ -12,13 +12,19 @@ import math
 WINDOWWIDTH = 800
 WINDOWHEIGHT = 600
 MAZE_WIDTH = 17
-MAZE_HEIGHT = 15
+MAZE_HEIGHT = 11
 CELL_WIDTH =  WINDOWWIDTH / MAZE_WIDTH
 CELL_HEIGHT = WINDOWHEIGHT / MAZE_HEIGHT
 FPS = 120
 SLIP = 0.0015
 GAMEPAD = 0
 
+def win_screen(win: bool) -> None:
+        if win == True:
+        # if gv.replay == False:
+            pr.draw_rectangle(0, 0, WINDOWWIDTH, WINDOWHEIGHT, pr.BLACK)
+            pr.draw_text(f'You win!', 275, 270, 60, pr.WHITE)
+            pr.draw_text('Press "Space" to play again', 190, 340, 30, pr.WHITE)
 
 def is_odd(number: int) -> bool:
     return number % 2 == 1
@@ -38,9 +44,9 @@ class Circle:
 
 mazegen = MazeGenerator(width=MAZE_WIDTH, height=MAZE_HEIGHT, seed=None)
 mazegen.generate_maze()
-
+win = False
 player = Circle(65, 17, 16, 0, 0)
-
+end_pos = Circle(round(CELL_WIDTH*(mazegen.end_pos[1] + 0.5)), round(CELL_HEIGHT*(mazegen.end_pos[0] + 0.5)), 16, 0, 0)
 # test_wall  = pr.Rectangle(300, 200, 100, 100)
 # m = (WINDOWWIDTH//line_lengthx, WINDOWHEIGHT//line_lengthy)
 #   
@@ -117,7 +123,8 @@ while not pr.window_should_close():
         if player.y > (wall.y - player.r) and player.y < (wall.y + player.r) and player.x > wall.x and player.x < wall.x + wall.width:
             player.vy *= -1
 
-
+    if player.x >= end_pos.x and player.y >= end_pos.y:
+        win = True
 
 
     pr.begin_drawing()
@@ -125,10 +132,10 @@ while not pr.window_should_close():
     
     for wall in walls:
         pr.draw_rectangle(round(wall.x), round(wall.y), round(wall.width), round(wall.height), pr.BLACK)
-
     # pr.draw_texture(flashlight, round(player.x - player.r)+16-800, round(player.y - player.r)+16-600, pr.WHITE)
     pr.draw_texture(character, round(player.x - player.r), round(player.y - player.r), pr.WHITE)
-    pr.draw_circle( round(CELL_WIDTH*(mazegen.end_pos[1] + 0.5)), round(CELL_HEIGHT*(mazegen.end_pos[0] + 0.5)), 16, pr.GREEN)
+    pr.draw_circle(int(end_pos.x), int(end_pos.y), end_pos.r, pr.GREEN)
+    win_screen(win)
     pr.end_drawing()
 pprint.pprint(mazegen.__dict__)
 pr.close_window()
