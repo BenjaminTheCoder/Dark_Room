@@ -29,13 +29,21 @@ class Circle:
 
 @dataclass
 class GameVariables:
-    mazegen:MazeGenerator = MazeGenerator(width=MAZE_WIDTH, height=MAZE_HEIGHT, seed=None)
+    mazegen:MazeGenerator = field(default_factory=lambda: MazeGenerator(width=MAZE_WIDTH, height=MAZE_HEIGHT, seed=None))
     win: bool = False
     player:Circle = field(default_factory=lambda:Circle(65, 17, 16, 0, 0))
-    end_pos:Circle = field(default_factory=lambda:Circle(0, 0, 0, 0, 0))
+    end_pos:Circle = field(default_factory=lambda:Circle(0, 0, 16, 0, 0))
+    replay:bool = False
 
-def __post_init__(self:GameVariables) -> None:
-    self.end_pos = Circle(round(CELL_WIDTH*(self.mazegen.end_pos[1] + 0.5)), round(CELL_HEIGHT*(self.mazegen.end_pos[0] + 0.5)), 16, 0, 0)
+    def __post_init__(self) -> None: 
+        self.mazegen.generate_maze()
+        self.end_pos = Circle(round(CELL_WIDTH*(self.mazegen.end_pos[1] + 0.5)), round(CELL_HEIGHT*(self.mazegen.end_pos[0] + 0.5)), 16, 0, 0)
+        
+        # TODO Set player position based on self.mazegen.start_pos
+
+        # Temporarily set the player position above the end_pos to quickly check for the win condition.
+        # self.player.x = self.end_pos.x
+        # self.player.y = self.end_pos.y - 20 
 
 
 pr.init_window(WINDOWWIDTH, WINDOWHEIGHT, "Dark Room")
@@ -50,12 +58,12 @@ flashlight = pr.load_texture("Assets/flashlight2.png")
 
 
 
-def win_screen(win: bool) -> None:
-    if win == True:
-    # if gv.replay == False:
-        pr.draw_rectangle(0, 0, WINDOWWIDTH, WINDOWHEIGHT, pr.BLACK)
+def win_screen(gv: GameVariables) -> None:
+    if gv.win == True:
+        # pr.draw_rectangle(0, 0, WINDOWWIDTH, WINDOWHEIGHT, pr.BLACK)
         pr.draw_text(f'You win!', 275, 270, 60, pr.WHITE)
-        pr.draw_text('Press "Space" to play again', 190, 340, 30, pr.WHITE)
+        # pr.draw_text('Press "Space" to play again', 190, 340, 30, pr.WHITE)
+            
 
 def is_odd(number: int) -> bool:
     return number % 2 == 1
@@ -64,14 +72,18 @@ def is_odd(number: int) -> bool:
 assert is_odd(MAZE_WIDTH), "MAZE_WIDTH must be odd!!"
 assert is_odd(MAZE_HEIGHT), "MAZE_HEIGHT must be odd!!"
 
-gv.mazegen.generate_maze()
+
 
 while not pr.window_should_close():
+
+    if pr.is_key_down(pr.KeyboardKey.KEY_SPACE):
+                replay = True
+                if replay == True:
+                    gv = GameVariables()
 
 
     if pr.is_key_down(pr.KeyboardKey.KEY_F):
         pr.toggle_fullscreen()
-
 
     # gv.player
     if pr.is_key_down(pr.KeyboardKey.KEY_W) or pr.is_key_down(pr.KeyboardKey.KEY_UP):
@@ -122,7 +134,7 @@ while not pr.window_should_close():
             gv.player.vy *= -1
 
     if gv.player.x >= gv.end_pos.x and gv.player.y >= gv.end_pos.y:
-        win = True
+        gv.win = True
 
 
     pr.begin_drawing()
@@ -130,10 +142,10 @@ while not pr.window_should_close():
     
     for wall in walls:
         pr.draw_rectangle(round(wall.x), round(wall.y), round(wall.width), round(wall.height), pr.BLACK)
-    pr.draw_texture(flashlight, round(gv.player.x - gv.player.r)+16-800, round(gv.player.y - gv.player.r)+16-600, pr.WHITE)
+    # pr.draw_texture(flashlight, round(gv.player.x - gv.player.r)+16-800, round(gv.player.y - gv.player.r)+16-600, pr.WHITE)
     pr.draw_texture(character, round(gv.player.x - gv.player.r), round(gv.player.y - gv.player.r), pr.WHITE)
     pr.draw_circle(int(gv.end_pos.x), int(gv.end_pos.y), gv.end_pos.r, pr.GREEN)
-    win_screen(win)
+    win_screen(gv)
     pr.end_drawing()
 pprint.pprint(gv.mazegen.__dict__)
 pr.close_window()
