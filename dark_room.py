@@ -1,10 +1,8 @@
 import pyray as pr
-# from labyrinth import maze # type: ignore
-# from labyrinth.grid import Cell, Direction, Grid # type: ignore
 from maze_generator_jotbleach import MazeGenerator #type: ignore
 from dataclasses import dataclass, field
 import pprint
-import random as rand
+import random
 import math
 
 
@@ -14,6 +12,7 @@ MAZE_WIDTH = 17
 MAZE_HEIGHT = 11
 CELL_WIDTH =  WINDOWWIDTH / MAZE_WIDTH
 CELL_HEIGHT = WINDOWHEIGHT / MAZE_HEIGHT
+POTS = 10
 FPS = 120
 SLIP = 0.0015
 GAMEPAD = 0
@@ -34,10 +33,23 @@ class GameVariables:
     player:Circle = field(default_factory=lambda:Circle(65, 17, 16, 0, 0))
     end_pos:Circle = field(default_factory=lambda:Circle(0, 0, 16, 0, 0))
     replay:bool = False
+    walls:list[pr.Rectangle] = field(default_factory=lambda:list())
+    pots:list[pr.Rectangle] = field(default_factory=lambda:list())
 
     def __post_init__(self) -> None: 
         self.mazegen.generate_maze()
         self.end_pos = Circle(round(CELL_WIDTH*(self.mazegen.end_pos[1] + 0.5)), round(CELL_HEIGHT*(self.mazegen.end_pos[0] + 0.5)), 16, 0, 0)
+        for row in range(0, MAZE_HEIGHT):
+            for col in range(0, MAZE_WIDTH):
+                if self.mazegen.maze[row][col] == 1:
+                    wall = pr.Rectangle(col*CELL_WIDTH, row*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT)  
+                    self.walls.append(wall)
+
+
+        for i in range(POTS):
+            pot = pr.Rectangle(random.randint(1, MAZE_WIDTH)*CELL_WIDTH, random.randint(1, MAZE_HEIGHT)*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT)  
+            self.pots.append(pot)
+
         
         # TODO Set player position based on self.mazegen.start_pos
 
@@ -116,14 +128,11 @@ while not pr.window_should_close():
 
 
 
-    walls = []
-    for row in range(0, MAZE_HEIGHT):
-        for col in range(0, MAZE_WIDTH):
-            if gv.mazegen.maze[row][col] == 1:
-                wall = pr.Rectangle(col*CELL_WIDTH, row*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT)  
-                walls.append(wall)
 
-    for wall in walls:
+    
+    
+
+    for wall in gv.walls:
         if gv.player.x < (wall.x + wall.width + gv.player.r) and gv.player.x > (wall.x + gv.player.r) and gv.player.y > wall.y and gv.player.y < wall.y + wall.height:
             gv.player.vx *= -1
         if gv.player.x > (wall.x - gv.player.r) and gv.player.x < (wall.x + gv.player.r) and gv.player.y > wall.y and gv.player.y < wall.y + wall.height:
@@ -140,11 +149,13 @@ while not pr.window_should_close():
     pr.begin_drawing()
     pr.clear_background((144, 213, 255))
     
-    for wall in walls:
+    for wall in gv.walls:
         pr.draw_rectangle(round(wall.x), round(wall.y), round(wall.width), round(wall.height), pr.BLACK)
-    pr.draw_texture(flashlight, round(gv.player.x - gv.player.r)+16-800, round(gv.player.y - gv.player.r)+16-600, pr.WHITE)
+    # pr.draw_texture(flashlight, round(gv.player.x - gv.player.r)+16-800, round(gv.player.y - gv.player.r)+16-600, pr.WHITE)
     pr.draw_texture(character, round(gv.player.x - gv.player.r), round(gv.player.y - gv.player.r), pr.WHITE)
     pr.draw_circle(int(gv.end_pos.x), int(gv.end_pos.y), gv.end_pos.r, pr.GREEN)
+    for pot in gv.pots:
+        pr.draw_rectangle(round(pot.x), round(pot.y), round(pot.width), round(pot.height), pr.RED)
     win_screen(gv)
     pr.end_drawing()
 pprint.pprint(gv.mazegen.__dict__)
