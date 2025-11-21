@@ -30,6 +30,7 @@ class Circle:
 class GameVariables:
     mazegen:MazeGenerator = field(default_factory=lambda: MazeGenerator(width=MAZE_WIDTH, height=MAZE_HEIGHT, seed=None))
     win: bool = False
+    lose: bool = False
     player:Circle = field(default_factory=lambda:Circle(65, 17, 16, 0, 0))
     end_pos:Circle = field(default_factory=lambda:Circle(0, 0, 16, 0, 0))
     replay:bool = False
@@ -65,6 +66,7 @@ pr.set_target_fps(FPS)
 gv = GameVariables()
 
 character = pr.load_texture("Assets/Dark_room_ball.png")
+potf = pr.load_texture("Assets/pot.png")
 flashlight = pr.load_texture("Assets/flashlight2.png")
 # end = pr.load_texture("Assets/Dark_Room_end.png")
 
@@ -72,8 +74,14 @@ flashlight = pr.load_texture("Assets/flashlight2.png")
 
 def win_screen(gv: GameVariables) -> None:
     if gv.win == True:
-        # pr.draw_rectangle(0, 0, WINDOWWIDTH, WINDOWHEIGHT, pr.BLACK)
+        pr.draw_rectangle(0, 0, WINDOWWIDTH, WINDOWHEIGHT, pr.BLACK)
         pr.draw_text(f'You win!', 275, 270, 60, pr.WHITE)
+        # pr.draw_text('Press "Space" to play again', 190, 340, 30, pr.WHITE)
+    
+def lose_screen(gv: GameVariables) -> None:
+    if gv.lose == True:
+        pr.draw_rectangle(0, 0, WINDOWWIDTH, WINDOWHEIGHT, pr.BLACK)
+        pr.draw_text(f'You lose!', 275, 270, 60, pr.WHITE)
         # pr.draw_text('Press "Space" to play again', 190, 340, 30, pr.WHITE)
             
 
@@ -142,6 +150,16 @@ while not pr.window_should_close():
         if gv.player.y > (wall.y - gv.player.r) and gv.player.y < (wall.y + gv.player.r) and gv.player.x > wall.x and gv.player.x < wall.x + wall.width:
             gv.player.vy *= -1
 
+    for pot in gv.pots:
+        if gv.player.x <= (round(pot.x) + round(pot.width) + gv.player.r) and gv.player.x > (round(pot.x) + gv.player.r) and gv.player.y > round(pot.y) and gv.player.y < round(pot.y) + round(pot.height):
+            gv.lose = True
+        if gv.player.x >= (round(pot.x) - gv.player.r) and gv.player.x < (round(pot.x) + gv.player.r) and gv.player.y > round(pot.y) and gv.player.y < round(pot.y) + round(pot.height):
+            gv.lose = True
+        if gv.player.y <= (round(pot.y) + round(pot.height) + gv.player.r) and gv.player.y > (round(pot.y) + gv.player.r) and gv.player.x > round(pot.x) and gv.player.x < round(pot.x) + round(pot.width):
+            gv.lose = True
+        if gv.player.y >= (round(pot.y) - gv.player.r) and gv.player.y < (round(pot.y) + gv.player.r) and gv.player.x > round(pot.x) and gv.player.x < round(pot.x) + round(pot.width):
+            gv.lose = True
+
     if gv.player.x >= gv.end_pos.x and gv.player.y >= gv.end_pos.y:
         gv.win = True
 
@@ -151,12 +169,13 @@ while not pr.window_should_close():
     
     for wall in gv.walls:
         pr.draw_rectangle(round(wall.x), round(wall.y), round(wall.width), round(wall.height), pr.BLACK)
-    # pr.draw_texture(flashlight, round(gv.player.x - gv.player.r)+16-800, round(gv.player.y - gv.player.r)+16-600, pr.WHITE)
+    pr.draw_texture(flashlight, round(gv.player.x - gv.player.r)+16-800, round(gv.player.y - gv.player.r)+16-600, pr.WHITE)
     pr.draw_texture(character, round(gv.player.x - gv.player.r), round(gv.player.y - gv.player.r), pr.WHITE)
     pr.draw_circle(int(gv.end_pos.x), int(gv.end_pos.y), gv.end_pos.r, pr.GREEN)
     for pot in gv.pots:
-        pr.draw_rectangle(round(pot.x), round(pot.y), round(pot.width), round(pot.height), pr.RED)
+        pr.draw_texture( potf, round(pot.x), round(pot.y), pr.BLUE)
     win_screen(gv)
+    lose_screen(gv)
     pr.end_drawing()
 pprint.pprint(gv.mazegen.__dict__)
 pr.close_window()
