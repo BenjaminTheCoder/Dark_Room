@@ -12,12 +12,20 @@ space = pm.Space()
 # space.gravity = Vec2d(0, -981)
 
 player = pm.Body()
-player.position = Vec2d(WINDOWWIDTH/2, -WINDOWHEIGHT/2)
+player.position = Vec2d(WINDOWWIDTH/2, -WINDOWHEIGHT/2 + 100)
 
+poly_body = pm.Body(body_type=pm.Body.STATIC)
+poly_body.position = Vec2d(WINDOWWIDTH/2, -WINDOWHEIGHT/2)
 
 poly = pm.Circle(player, 20)
 poly.mass = 10
+poly.elasticity = 1
 space.add(player, poly)
+
+polybox = pm.Poly.create_box(poly_body, (50, 50))
+polybox.elasticity = 1
+space.add(poly_body, polybox)
+
 
 print_options = pm.SpaceDebugDrawOptions()
 while not pr.window_should_close():
@@ -59,5 +67,6 @@ while not pr.window_should_close():
     pr.begin_drawing()
     pr.clear_background((144, 213, 255))
     pr.draw_circle(round(player.position.x), round(-player.position.y), 20, pr.BLUE)
+    pr.draw_rectangle(round(poly_body.position.x) -25, round(-poly_body.position.y) - 25, 50, 50, pr.BLACK)
     pr.end_drawing()
 pr.close_window()
