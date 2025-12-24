@@ -4,59 +4,10 @@ from dataclasses import dataclass, field
 import pprint
 import random
 import math
+from constants import *
+from class_definitions import GameVariables
 
 
-WINDOWWIDTH = 800
-WINDOWHEIGHT = 600
-MAZE_WIDTH = 17
-MAZE_HEIGHT = 11
-CELL_WIDTH =  WINDOWWIDTH / MAZE_WIDTH
-CELL_HEIGHT = WINDOWHEIGHT / MAZE_HEIGHT
-POTS = 10
-FPS = 120
-SLIP = 0.0015
-GAMEPAD = 0
-
-@dataclass
-class Circle:
-    x: float
-    y: float
-    r: int
-    vx: float
-    vy: float
-
-
-@dataclass
-class GameVariables:
-    mazegen:MazeGenerator = field(default_factory=lambda: MazeGenerator(width=MAZE_WIDTH, height=MAZE_HEIGHT, seed=None))
-    win: bool = False
-    lose: bool = False
-    player:Circle = field(default_factory=lambda:Circle(65, 17, 16, 0, 0))
-    end_pos:Circle = field(default_factory=lambda:Circle(0, 0, 16, 0, 0))
-    replay:bool = False
-    walls:list[pr.Rectangle] = field(default_factory=lambda:list())
-    pots:list[pr.Rectangle] = field(default_factory=lambda:list())
-
-    def __post_init__(self) -> None: 
-        self.mazegen.generate_maze()
-        self.end_pos = Circle(round(CELL_WIDTH*(self.mazegen.end_pos[1] + 0.5)), round(CELL_HEIGHT*(self.mazegen.end_pos[0] + 0.5)), 16, 0, 0)
-        for row in range(0, MAZE_HEIGHT):
-            for col in range(0, MAZE_WIDTH):
-                if self.mazegen.maze[row][col] == 1:
-                    wall = pr.Rectangle(col*CELL_WIDTH, row*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT)  
-                    self.walls.append(wall)
-
-
-        for i in range(POTS):
-            pot = pr.Rectangle(random.randint(1, MAZE_WIDTH)*CELL_WIDTH, random.randint(1, MAZE_HEIGHT)*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT)  
-            self.pots.append(pot)
-
-        
-        # TODO Set player position based on self.mazegen.start_pos
-
-        # Temporarily set the player position above the end_pos to quickly check for the win condition.
-        # self.player.x = self.end_pos.x
-        # self.player.y = self.end_pos.y - 20 
 
 
 pr.init_window(WINDOWWIDTH, WINDOWHEIGHT, "Dark Room")
@@ -83,7 +34,31 @@ def lose_screen(gv: GameVariables) -> None:
         pr.draw_rectangle(0, 0, WINDOWWIDTH, WINDOWHEIGHT, pr.BLACK)
         pr.draw_text(f'You lose!', 275, 270, 60, pr.WHITE)
         # pr.draw_text('Press "Space" to play again', 190, 340, 30, pr.WHITE)
-            
+
+def canYouGoThereX(nextX: float, walls: list[pr.Rectangle]) -> bool:
+    canGo = True
+    for wall in walls:
+        if (
+            nextX >= wall.x
+            and nextX < wall.x + wall.width
+        ):
+            canGo = False
+    return canGo
+
+def canYouGoThereY(nextY: float, walls: list[pr.Rectangle]) -> bool:
+    for wall in walls:
+        if (
+            nextY >= wall.y
+            and nextY < wall.height + wall.y
+        ):
+            canGo = True
+        else:    
+            canGo = False
+    return canGo
+
+
+def canYouGoThere(nextX: float, nextY: float, walls: list[pr.Rectangle]) -> bool:
+    return canYouGoThereX(nextX, walls) and canYouGoThereY(nextY, walls)
 
 def is_odd(number: int) -> bool:
     return number % 2 == 1
@@ -140,15 +115,26 @@ while not pr.window_should_close():
     
     
 
-    for wall in gv.walls:
-        if gv.player.x < (wall.x + wall.width + gv.player.r) and gv.player.x > (wall.x + gv.player.r) and gv.player.y > wall.y and gv.player.y < wall.y + wall.height:
-            gv.player.vx *= -1
-        if gv.player.x > (wall.x - gv.player.r) and gv.player.x < (wall.x + gv.player.r) and gv.player.y > wall.y and gv.player.y < wall.y + wall.height:
-            gv.player.vx *= -1
-        if gv.player.y < (wall.y + wall.height + gv.player.r) and gv.player.y > (wall.y + gv.player.r) and gv.player.x > wall.x and gv.player.x < wall.x + wall.width:
-            gv.player.vy *= -1
-        if gv.player.y > (wall.y - gv.player.r) and gv.player.y < (wall.y + gv.player.r) and gv.player.x > wall.x and gv.player.x < wall.x + wall.width:
-            gv.player.vy *= -1
+    # for wall in gv.walls:
+    #     if gv.player.x < (wall.x + wall.width + gv.player.r) and gv.player.x > (wall.x + gv.player.r) and gv.player.y > wall.y and gv.player.y < wall.y + wall.height:
+    #         gv.player.vx *= -1
+    #     if gv.player.x > (wall.x - gv.player.r) and gv.player.x < (wall.x + gv.player.r) and gv.player.y > wall.y and gv.player.y < wall.y + wall.height:
+    #         gv.player.vx *= -1.
+
+    #     if gv.player.y < (wall.y + wall.height + gv.player.r) and gv.player.y > (wall.y + gv.player.r) and gv.player.x > wall.x and gv.player.x < wall.x + wall.width:
+    #         gv.player.vy *= -1
+    #     if gv.player.y > (wall.y - gv.player.r) and gv.player.y < (wall.y + gv.player.r) and gv.player.x > wall.x and gv.player.x < wall.x + wall.width:
+    #         gv.player.vy *= -1
+
+
+    if canYouGoThereX(gv.player.x + gv.player.vx, gv.walls):
+        print("I can go there!")
+        
+    else:
+        print("Oh no! I cannot go there!")
+        # gv.player.vx *= -1
+        # gv.player.vy *= -1
+    
 
     for pot in gv.pots:
         if gv.player.x <= (round(pot.x) + round(pot.width) + gv.player.r) and gv.player.x > (round(pot.x) + gv.player.r) and gv.player.y > round(pot.y) and gv.player.y < round(pot.y) + round(pot.height):
