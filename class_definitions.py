@@ -3,7 +3,7 @@ from maze_generator_jotbleach import MazeGenerator #type: ignore
 import pyray as pr
 import random
 from constants import *
-
+import pymunk as pm
 
 
 @dataclass

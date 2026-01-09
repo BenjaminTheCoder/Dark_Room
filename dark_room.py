@@ -69,6 +69,9 @@ assert is_odd(MAZE_HEIGHT), "MAZE_HEIGHT must be odd!!"
 
 
 
+def draw_end_pos(gv: GameVariables) -> None:
+    pr.draw_circle(int(gv.end_pos.x), int(gv.end_pos.y), gv.end_pos.r, pr.GREEN)
+
 while not pr.window_should_close():
 
     if pr.is_key_down(pr.KeyboardKey.KEY_SPACE):
@@ -157,7 +160,7 @@ while not pr.window_should_close():
         pr.draw_rectangle(round(wall.x), round(wall.y), round(wall.width), round(wall.height), pr.BLACK)
     pr.draw_texture(flashlight, round(gv.player.x - gv.player.r)+16-800, round(gv.player.y - gv.player.r)+16-600, pr.WHITE)
     pr.draw_texture(character, round(gv.player.x - gv.player.r), round(gv.player.y - gv.player.r), pr.WHITE)
-    pr.draw_circle(int(gv.end_pos.x), int(gv.end_pos.y), gv.end_pos.r, pr.GREEN)
+    draw_end_pos(gv)
     for pot in gv.pots:
         pr.draw_texture( potf, round(pot.x), round(pot.y), pr.BLUE)
     win_screen(gv)
