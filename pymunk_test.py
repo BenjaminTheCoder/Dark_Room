@@ -58,6 +58,7 @@ maze = make_maze()
 
 space = pm.Space()
 # space.gravity = Vec2d(0, -981)
+# space.gravity = Vec2d(981, 0)
 
 player_body = pm.Body()
 player_body.position = start_pos = Vec2d(round(CELL_WIDTH*(maze.start_pos[1] + 0.5)), -round(CELL_HEIGHT*(maze.start_pos[0] + 0.5)))
@@ -69,7 +70,7 @@ space.add(player_body, player_shape)
 
 squares = build_maze(maze, space)
 
-end_trigger = make_box(Vec2d(round(CELL_WIDTH*(maze.end_pos[1] + 0.5)), -round(CELL_HEIGHT*(maze.end_pos[0] + 0.5))), space)
+end_trigger = Vec2d(round(CELL_WIDTH*(maze.end_pos[1] + 0.5)), -round(CELL_HEIGHT*(maze.end_pos[0] + 0.5)))
 
 print_options = pm.SpaceDebugDrawOptions()
 
@@ -79,7 +80,6 @@ def input_handling(player_body: pm.Body, player_poly: pm.Circle,) -> None:
         pr.toggle_fullscreen()
     if pr.is_key_down(pr.KeyboardKey.KEY_ESCAPE) and screen == Screen.GAME:
         screen = Screen.PAUSE
-        print("esc", screen)
     if pr.is_key_down(pr.KeyboardKey.KEY_W) or pr.is_key_down(pr.KeyboardKey.KEY_UP):
         player_body.velocity = Vec2d(player_body.velocity.x, player_body.velocity.y + SLIP)
     if pr.get_gamepad_axis_movement(0, pr.GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > 0.1:
@@ -114,7 +114,8 @@ while not pr.window_should_close():
     space.step(1/FPS)
     # space.debug_draw(print_options)
 
-    # if player_body
+    if player_body.position.y < end_trigger.y:
+        screen = Screen.WIN
 
 # button checks
     if play_button == 1:
@@ -131,7 +132,7 @@ while not pr.window_should_close():
     match screen:
         case Screen.GAME:
             pr.draw_circle(round(player_body.position.x), round(-player_body.position.y), player_shape.radius, pr.BLUE)
-            pr.draw_rectangle(math.ceil(end_trigger.position.x - CELL_WIDTH / 2), math.ceil(-end_trigger.position.y - CELL_HEIGHT / 2), math.ceil(CELL_WIDTH), math.ceil(CELL_HEIGHT), pr.GREEN)
+            # pr.draw_rectangle(math.ceil(end_trigger.x - CELL_WIDTH / 2), math.ceil(-end_trigger.y - CELL_HEIGHT / 2), math.ceil(CELL_WIDTH), math.ceil(CELL_HEIGHT), pr.GREEN)
             for poly_box in squares:
                 pr.draw_rectangle(math.ceil(poly_box.position.x - CELL_WIDTH / 2), math.ceil(-poly_box.position.y - CELL_HEIGHT / 2), math.ceil(CELL_WIDTH), math.ceil(CELL_HEIGHT), pr.BLACK)
             
