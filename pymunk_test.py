@@ -54,6 +54,7 @@ pr.set_exit_key(pr.KeyboardKey.KEY_NULL)
 screen = Screen.TITLE
 play_button = 0
 settings_button = 0
+quit_button = 0
 maze = make_maze()
 
 space = pm.Space()
@@ -80,6 +81,8 @@ def input_handling(player_body: pm.Body, player_poly: pm.Circle,) -> None:
         pr.toggle_fullscreen()
     if pr.is_key_down(pr.KeyboardKey.KEY_ESCAPE) and screen == Screen.GAME:
         screen = Screen.PAUSE
+    if pr.is_key_down(pr.KeyboardKey.KEY_SPACE) and (screen == Screen.WIN or screen == Screen.LOSE):
+        screen = Screen.GAME
     if pr.is_key_down(pr.KeyboardKey.KEY_W) or pr.is_key_down(pr.KeyboardKey.KEY_UP):
         player_body.velocity = Vec2d(player_body.velocity.x, player_body.velocity.y + SLIP)
     if pr.get_gamepad_axis_movement(0, pr.GamepadAxis.GAMEPAD_AXIS_LEFT_Y) > 0.1:
@@ -126,6 +129,10 @@ while not pr.window_should_close():
         screen = Screen.SETTINGS
         settings_button = 0
 
+    if quit_button == 1:
+        screen = Screen.TITLE
+        quit_button = 0
+
     pr.begin_drawing()
     pr.clear_background((144, 213, 255))
 
@@ -145,11 +152,12 @@ while not pr.window_should_close():
             print("Settings")
 
         case Screen.PAUSE:
-            print("Pause") 
+            quit_button = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, WINDOWHEIGHT/2-BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT), "QUIT")
 
         case Screen.WIN:
             pr.draw_rectangle(0, 0, WINDOWWIDTH, WINDOWHEIGHT, pr.BLACK)
             pr.draw_text(f'You win!', 275, 270, 60, pr.WHITE)
+            pr.draw_text(f'Press SPACE to play again.', 130, 270+80, 40, pr.WHITE)
 
         case Screen.LOSE:
             pr.draw_rectangle(0, 0, WINDOWWIDTH, WINDOWHEIGHT, pr.BLACK)
