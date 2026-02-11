@@ -55,6 +55,7 @@ screen = Screen.TITLE
 play_button = 0
 settings_button = 0
 quit_button = 0
+quit_buttonT = 0
 maze = make_maze()
 
 space = pm.Space()
@@ -108,6 +109,8 @@ def input_handling(player_body: pm.Body, player_poly: pm.Circle,) -> None:
     if player_body.position.x + player_poly.radius >= WINDOWWIDTH:
         player_body.velocity = Vec2d(-player_body.velocity.x, player_body.velocity.y)
 
+# dropdown_edit = False
+
 while not pr.window_should_close():
 
     # input handling
@@ -132,6 +135,10 @@ while not pr.window_should_close():
     if quit_button == 1:
         screen = Screen.TITLE
         quit_button = 0
+    
+    if quit_buttonT == 1:
+        pr.close_window()
+        quit_button = 0
 
     pr.begin_drawing()
     pr.clear_background((144, 213, 255))
@@ -147,9 +154,14 @@ while not pr.window_should_close():
         case Screen.TITLE:
             play_button = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, WINDOWHEIGHT/2-BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT), "PLAY")
             settings_button = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, (WINDOWHEIGHT/2-BUTTON_HEIGHT/2+BUTTON_HEIGHT*1.5), BUTTON_WIDTH, BUTTON_HEIGHT), "SETTINGS")
+            quit_buttonT = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, (WINDOWHEIGHT/2-BUTTON_HEIGHT/2+BUTTON_HEIGHT*3), BUTTON_WIDTH, BUTTON_HEIGHT), "QUIT")
 
         case Screen.SETTINGS:
-            print("Settings")
+            print("settings")
+            # selected = pr.ffi.new('int *', 1)
+            # # if (GuiDropdownBox((Rectangle){ 25, 25, 125, 30 }, "ONE;TWO;THREE", &dropdownBox000Active, dropDown000EditMode)) dropDown000EditMode = !dropDown000EditMode;
+            # pr.gui_dropdown_box(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, WINDOWHEIGHT/2-BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT), "EASY;MEDIUM;HARD", selected, True)
+
 
         case Screen.PAUSE:
             quit_button = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, WINDOWHEIGHT/2-BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT), "QUIT")
@@ -167,4 +179,4 @@ while not pr.window_should_close():
             print("Chaos has conquered!!!")
     pr.end_drawing()
 pr.close_window()
-pprint(maze.__dict__)
+# pprint(maze.__dict__)
