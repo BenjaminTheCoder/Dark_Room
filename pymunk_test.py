@@ -76,6 +76,12 @@ end_trigger = Vec2d(round(CELL_WIDTH*(maze.end_pos[1] + 0.5)), -round(CELL_HEIGH
 
 print_options = pm.SpaceDebugDrawOptions()
 
+difficulty_selection = 0
+difficulty_selection_cint = pr.ffi.new("int *", 0)
+difficulty_edit_mode = False
+difficulty_options = "EASY;MID;HARD"
+diffuculty_options_list = difficulty_options.split(";")
+
 def input_handling(player_body: pm.Body, player_poly: pm.Circle,) -> None:
     global screen
     if pr.is_key_down(pr.KeyboardKey.KEY_F):
@@ -109,7 +115,6 @@ def input_handling(player_body: pm.Body, player_poly: pm.Circle,) -> None:
     if player_body.position.x + player_poly.radius >= WINDOWWIDTH:
         player_body.velocity = Vec2d(-player_body.velocity.x, player_body.velocity.y)
 
-# dropdown_edit = False
 
 while not pr.window_should_close():
 
@@ -140,6 +145,12 @@ while not pr.window_should_close():
         pr.close_window()
         quit_button = 0
 
+    checked = False
+
+
+    if checked == True:
+        checked = True
+
     pr.begin_drawing()
     pr.clear_background((144, 213, 255))
 
@@ -157,10 +168,10 @@ while not pr.window_should_close():
             quit_buttonT = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, (WINDOWHEIGHT/2-BUTTON_HEIGHT/2+BUTTON_HEIGHT*3), BUTTON_WIDTH, BUTTON_HEIGHT), "QUIT")
 
         case Screen.SETTINGS:
-            print("settings")
-            # selected = pr.ffi.new('int *', 1)
-            # # if (GuiDropdownBox((Rectangle){ 25, 25, 125, 30 }, "ONE;TWO;THREE", &dropdownBox000Active, dropDown000EditMode)) dropDown000EditMode = !dropDown000EditMode;
-            # pr.gui_dropdown_box(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, WINDOWHEIGHT/2-BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT), "EASY;MEDIUM;HARD", selected, True)
+            if pr.gui_dropdown_box(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, WINDOWHEIGHT/2-BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT), difficulty_options, difficulty_selection_cint, difficulty_edit_mode):
+                difficulty_edit_mode = not difficulty_edit_mode
+                difficulty_selection = int(difficulty_selection_cint[0])
+                print(diffuculty_options_list[difficulty_selection])
 
 
         case Screen.PAUSE:
