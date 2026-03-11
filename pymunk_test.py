@@ -1,4 +1,5 @@
 import pymunk as pm
+from pygame import mixer
 from pymunk import Vec2d
 import pyray as pr
 from constants import *
@@ -55,8 +56,11 @@ screen = Screen.TITLE
 play_button = 0
 settings_button = 0
 quit_button = 0
-quit_buttonT = 0
+quit_button_title = 0
 maze = make_maze()
+mixer.init()
+mixer.music.load('Assets/dark_room_music.mp3')
+
 
 space = pm.Space()
 # space.gravity = Vec2d(0, -981)
@@ -141,7 +145,7 @@ while not pr.window_should_close():
         screen = Screen.TITLE
         quit_button = 0
     
-    if quit_buttonT == 1:
+    if quit_button_title == 1:
         pr.close_window()
         quit_button = 0
 
@@ -156,6 +160,7 @@ while not pr.window_should_close():
 
     match screen:
         case Screen.GAME:
+            
             pr.draw_circle(round(player_body.position.x), round(-player_body.position.y), player_shape.radius, pr.BLUE)
             # pr.draw_rectangle(math.ceil(end_trigger.x - CELL_WIDTH / 2), math.ceil(-end_trigger.y - CELL_HEIGHT / 2), math.ceil(CELL_WIDTH), math.ceil(CELL_HEIGHT), pr.GREEN)
             for poly_box in squares:
@@ -163,9 +168,10 @@ while not pr.window_should_close():
             
 
         case Screen.TITLE:
+            mixer.music.play(1)
             play_button = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, WINDOWHEIGHT/2-BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT), "PLAY")
             settings_button = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, (WINDOWHEIGHT/2-BUTTON_HEIGHT/2+BUTTON_HEIGHT*1.5), BUTTON_WIDTH, BUTTON_HEIGHT), "SETTINGS")
-            quit_buttonT = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, (WINDOWHEIGHT/2-BUTTON_HEIGHT/2+BUTTON_HEIGHT*3), BUTTON_WIDTH, BUTTON_HEIGHT), "QUIT")
+            quit_button_title = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, (WINDOWHEIGHT/2-BUTTON_HEIGHT/2+BUTTON_HEIGHT*3), BUTTON_WIDTH, BUTTON_HEIGHT), "QUIT")
 
         case Screen.SETTINGS:
             if pr.gui_dropdown_box(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, WINDOWHEIGHT/2-BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT), difficulty_options, difficulty_selection_cint, difficulty_edit_mode):
