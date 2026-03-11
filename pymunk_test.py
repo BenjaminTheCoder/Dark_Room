@@ -17,7 +17,7 @@ class Screen(Enum):
     WIN = auto()
     LOSE = auto()
 
-
+global screen, play_button, settings_button, quit_button, quit_button_title, maze, space, player_body, player_shape, squares, end_trigger, print_options, difficulty_selection, difficulty_selection_cint, difficulty_edit_mode, diffuculty_options_list
 
 def make_box(pos: Vec2d, space: pm.Space) -> pm.Body:
     poly_body = pm.Body(body_type=pm.Body.STATIC)
@@ -58,33 +58,46 @@ settings_button = 0
 quit_button = 0
 quit_button_title = 0
 maze = make_maze()
-mixer.init()
-mixer.music.load('Assets/dark_room_music.mp3')
-
-
 space = pm.Space()
-# space.gravity = Vec2d(0, -981)
-# space.gravity = Vec2d(981, 0)
-
 player_body = pm.Body()
 player_body.position = start_pos = Vec2d(round(CELL_WIDTH*(maze.start_pos[1] + 0.5)), -round(CELL_HEIGHT*(maze.start_pos[0] + 0.5)))
-
 player_shape = pm.Circle(player_body, CELL_WIDTH/4)
 player_shape.mass = 10
 player_shape.elasticity = ELASTICITY
 space.add(player_body, player_shape)
-
 squares = build_maze(maze, space)
-
 end_trigger = Vec2d(round(CELL_WIDTH*(maze.end_pos[1] + 0.5)), -round(CELL_HEIGHT*(maze.end_pos[0] + 0.5)))
-
 print_options = pm.SpaceDebugDrawOptions()
-
 difficulty_selection = 0
 difficulty_selection_cint = pr.ffi.new("int *", 0)
 difficulty_edit_mode = False
 difficulty_options = "EASY;MID;HARD"
 diffuculty_options_list = difficulty_options.split(";")
+
+def reset() -> None:
+
+    global screen, play_button, settings_button, quit_button, quit_button_title, maze, space, player_body, player_shape, squares, end_trigger, print_options, difficulty_selection, difficulty_selection_cint, difficulty_edit_mode, diffuculty_options_list
+    screen = Screen.TITLE
+    play_button = 0
+    settings_button = 0
+    quit_button = 0
+    quit_button_title = 0
+    maze = make_maze()
+    space = pm.Space()
+    player_body = pm.Body()
+    player_body.position = start_pos = Vec2d(round(CELL_WIDTH*(maze.start_pos[1] + 0.5)), -round(CELL_HEIGHT*(maze.start_pos[0] + 0.5)))
+    player_shape = pm.Circle(player_body, CELL_WIDTH/4)
+    player_shape.mass = 10
+    player_shape.elasticity = ELASTICITY
+    space.add(player_body, player_shape)
+    squares = build_maze(maze, space)
+    end_trigger = Vec2d(round(CELL_WIDTH*(maze.end_pos[1] + 0.5)), -round(CELL_HEIGHT*(maze.end_pos[0] + 0.5)))
+    print_options = pm.SpaceDebugDrawOptions()
+    difficulty_selection = 0
+    difficulty_selection_cint = pr.ffi.new("int *", 0)
+    difficulty_edit_mode = False
+    difficulty_options = "EASY;MID;HARD"
+    diffuculty_options_list = difficulty_options.split(";")
 
 def input_handling(player_body: pm.Body, player_poly: pm.Circle,) -> None:
     global screen
@@ -93,6 +106,7 @@ def input_handling(player_body: pm.Body, player_poly: pm.Circle,) -> None:
     if pr.is_key_down(pr.KeyboardKey.KEY_ESCAPE) and screen == Screen.GAME:
         screen = Screen.PAUSE
     if pr.is_key_down(pr.KeyboardKey.KEY_SPACE) and (screen == Screen.WIN or screen == Screen.LOSE):
+        reset()
         screen = Screen.GAME
     if pr.is_key_down(pr.KeyboardKey.KEY_W) or pr.is_key_down(pr.KeyboardKey.KEY_UP):
         player_body.velocity = Vec2d(player_body.velocity.x, player_body.velocity.y + SLIP)
@@ -119,6 +133,8 @@ def input_handling(player_body: pm.Body, player_poly: pm.Circle,) -> None:
     if player_body.position.x + player_poly.radius >= WINDOWWIDTH:
         player_body.velocity = Vec2d(-player_body.velocity.x, player_body.velocity.y)
 
+mixer.init()
+mixer.music.load('Assets/dark_room_music.mp3')
 
 while not pr.window_should_close():
 
@@ -158,6 +174,7 @@ while not pr.window_should_close():
     pr.begin_drawing()
     pr.clear_background((144, 213, 255))
 
+
     match screen:
         case Screen.GAME:
             
@@ -168,7 +185,7 @@ while not pr.window_should_close():
             
 
         case Screen.TITLE:
-            mixer.music.play(1)
+            mixer.music.play()
             play_button = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, WINDOWHEIGHT/2-BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT), "PLAY")
             settings_button = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, (WINDOWHEIGHT/2-BUTTON_HEIGHT/2+BUTTON_HEIGHT*1.5), BUTTON_WIDTH, BUTTON_HEIGHT), "SETTINGS")
             quit_button_title = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, (WINDOWHEIGHT/2-BUTTON_HEIGHT/2+BUTTON_HEIGHT*3), BUTTON_WIDTH, BUTTON_HEIGHT), "QUIT")
