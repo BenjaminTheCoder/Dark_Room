@@ -1,5 +1,4 @@
 import pymunk as pm
-from pygame import mixer
 from pymunk import Vec2d
 import pyray as pr
 from constants import *
@@ -17,7 +16,8 @@ class Screen(Enum):
     WIN = auto()
     LOSE = auto()
 
-global screen, play_button, settings_button, quit_button, quit_button_title, maze, space, player_body, player_shape, squares, end_trigger, print_options, difficulty_selection, difficulty_selection_cint, difficulty_edit_mode, diffuculty_options_list
+global screen, play_button, time, settings_button, quit_button, resume_button, back_button, frame_move, quit_button_title, maze, space, player_body, player_shape, squares, end_trigger, print_options, difficulty_selection, difficulty_selection_cint, difficulty_edit_mode, diffuculty_options_list
+
 
 def make_box(pos: Vec2d, space: pm.Space) -> pm.Body:
     poly_body = pm.Body(body_type=pm.Body.STATIC)
@@ -43,10 +43,21 @@ def build_maze(maze: MazeGenerator, space: pm.Space) -> list[pm.Body]:
                 walls.append(wall)
     return walls
 
+pr.init_window(WINDOWWIDTH, WINDOWHEIGHT, "Dark Room")
+pr.init_audio_device()
+
+music = pr.load_music_stream('Assets/dark_room_music.mp3')
+pr.set_music_volume(music, 0.5)
+pr.play_music_stream(music)
+dead = pr.load_sound('Assets/dark_room_impact.mp3')
+pr.set_sound_volume (dead, 1.0)
+
 # Collision callback
-def on_begin(arbiter, space, data):
+def on_begin(arbiter, space: pm.Space, data) -> None:
+    global screen
     print("DIE")
     print(arbiter.shapes)
+    screen = Screen.LOSE
 
 
 
@@ -54,15 +65,16 @@ def on_begin(arbiter, space, data):
 #     return pr.Vector2(point.x, WINDOWHEIGHT - point.y)
 
 
-pr.init_window(WINDOWWIDTH, WINDOWHEIGHT, "Dark Room")
-pr.init_audio_device()
 
 
 pr.set_target_fps(FPS)
 
 pr.set_exit_key(pr.KeyboardKey.KEY_NULL)
 
+flashlight = pr.load_texture("Assets/flashlight2.png")
+
 screen = Screen.TITLE
+time = 60*FPS
 play_button = 0
 settings_button = 0
 quit_button = 0   
@@ -90,9 +102,9 @@ difficulty_options = "EASY;MID;HARD"
 diffuculty_options_list = difficulty_options.split(";")
 
 def reset() -> None:
-
-    global screen, play_button, settings_button, quit_button, resume_button, back_button, frame_move, quit_button_title, maze, space, player_body, player_shape, squares, end_trigger, print_options, difficulty_selection, difficulty_selection_cint, difficulty_edit_mode, diffuculty_options_list
+    global screen, play_button, time, settings_button, quit_button, resume_button, back_button, frame_move, quit_button_title, maze, space, player_body, player_shape, squares, end_trigger, print_options, difficulty_selection, difficulty_selection_cint, difficulty_edit_mode, diffuculty_options_list
     screen = Screen.TITLE
+    time = 60*FPS
     play_button = 0
     settings_button = 0
     quit_button = 0
@@ -112,11 +124,11 @@ def reset() -> None:
     squares = build_maze(maze, space)
     end_trigger = Vec2d(round(CELL_WIDTH*(maze.end_pos[1] + 0.5)), -round(CELL_HEIGHT*(maze.end_pos[0] + 0.5)))
     print_options = pm.SpaceDebugDrawOptions()
-    difficulty_selection = 0
-    difficulty_selection_cint = pr.ffi.new("int *", 0)
-    difficulty_edit_mode = False
-    difficulty_options = "EASY;MID;HARD"
-    diffuculty_options_list = difficulty_options.split(";")
+    # difficulty_selection = 0
+    # difficulty_selection_cint = pr.ffi.new("int *", 0)
+    # difficulty_edit_mode = False
+    # difficulty_options = "EASY;MID;HARD"
+    # diffuculty_options_list = difficulty_options.split(";")
 
 def input_handling(player_body: pm.Body, player_poly: pm.Circle,) -> None:
     global screen
@@ -153,12 +165,17 @@ def input_handling(player_body: pm.Body, player_poly: pm.Circle,) -> None:
         player_body.velocity = Vec2d(-player_body.velocity.x, player_body.velocity.y)
 
 
-music = pr.load_music_stream('Assets/dark_room_music.mp3')
-pr.set_music_volume(music, 1.0)
-pr.play_music_stream(music)
+
+
+
+
 
 while not pr.window_should_close():
     pr.update_music_stream(music)
+    time -= 1
+
+
+
     # input handling
 
     input_handling(player_body, player_shape)
@@ -169,6 +186,7 @@ while not pr.window_should_close():
 
     if player_body.position.y < end_trigger.y:
         screen = Screen.WIN
+        
 
 # button checks
     if play_button == 1:
@@ -197,6 +215,10 @@ while not pr.window_should_close():
         back_button = 0
     checked = False
 
+    if time == 0:
+        screen = Screen.LOSE
+
+
 
     if checked == True:
         checked = True
@@ -208,9 +230,10 @@ while not pr.window_should_close():
     match screen:
         case Screen.GAME:
             pr.draw_circle(round(player_body.position.x), round(-player_body.position.y), player_shape.radius, pr.BLUE)
-            # pr.draw_rectangle(math.ceil(end_trigger.x - CELL_WIDTH / 2), math.ceil(-end_trigger.y - CELL_HEIGHT / 2), math.ceil(CELL_WIDTH), math.ceil(CELL_HEIGHT), pr.GREEN)
+            pr.draw_texture(flashlight, round(player_body.position.x - player_shape.radius)+16-800, round(-player_body.position.y - player_shape.radius)+16-600, pr.WHITE)
             for poly_box in squares:
                 pr.draw_rectangle(math.ceil(poly_box.position.x - CELL_WIDTH / 2), math.ceil(-poly_box.position.y - CELL_HEIGHT / 2), math.ceil(CELL_WIDTH), math.ceil(CELL_HEIGHT), pr.BLACK)
+            pr.draw_text(f'{time//60}', WINDOWWIDTH//2-30, 80, 60, pr.WHITE)
             
 
         case Screen.TITLE:
@@ -218,15 +241,13 @@ while not pr.window_should_close():
             settings_button = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, (WINDOWHEIGHT/2-BUTTON_HEIGHT/2+BUTTON_HEIGHT*1.5), BUTTON_WIDTH, BUTTON_HEIGHT), "SETTINGS")
             quit_button_title = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, (WINDOWHEIGHT/2-BUTTON_HEIGHT/2+BUTTON_HEIGHT*3), BUTTON_WIDTH, BUTTON_HEIGHT), "QUIT")
 
+
         case Screen.SETTINGS:
-            back_button = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, (WINDOWHEIGHT/2-BUTTON_HEIGHT/2+BUTTON_HEIGHT*1.5), BUTTON_WIDTH, BUTTON_HEIGHT), "BACK")
+            back_button = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, (WINDOWHEIGHT/2-BUTTON_HEIGHT/2+BUTTON_HEIGHT*1.6), BUTTON_WIDTH, BUTTON_HEIGHT), "BACK")
             if pr.gui_dropdown_box(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, WINDOWHEIGHT/2-BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT), difficulty_options, difficulty_selection_cint, difficulty_edit_mode):
                 difficulty_edit_mode = not difficulty_edit_mode
                 difficulty_selection = int(difficulty_selection_cint[0])
                 print(diffuculty_options_list[difficulty_selection])
-
-            
-
 
 
         case Screen.PAUSE:
@@ -238,10 +259,14 @@ while not pr.window_should_close():
             pr.draw_rectangle(0, 0, WINDOWWIDTH, WINDOWHEIGHT, pr.BLACK)
             pr.draw_text(f'You win!', 275, 270, 60, pr.WHITE)
             pr.draw_text(f'Press SPACE to play again.', 130, 270+80, 40, pr.WHITE)
+            if time == 60:
+                time = 60*FPS
 
         case Screen.LOSE:
             pr.draw_rectangle(0, 0, WINDOWWIDTH, WINDOWHEIGHT, pr.BLACK)
-            pr.draw_text(f'You lose!', 275, 270, 60, pr.WHITE)          
+            pr.draw_text(f'You lose!', 275, 270, 60, pr.WHITE)     
+            pr.draw_text(f'Press SPACE to play again.', 130, 270+80, 40, pr.WHITE)
+     
 
         case _:
             print("Chaos has conquered!!!")
