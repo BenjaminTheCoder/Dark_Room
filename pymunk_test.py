@@ -24,7 +24,6 @@ def make_box(pos: Vec2d, space: pm.Space) -> pm.Body:
     poly_body.position = pos
     polybox = pm.Poly.create_box(poly_body, (round(CELL_WIDTH), round(CELL_HEIGHT)))
     polybox.elasticity = ELASTICITY
-    polybox.mass = 1000000
     polybox.collision_type = 1
     space.add(poly_body, polybox)
     return poly_body
@@ -53,11 +52,11 @@ dead = pr.load_sound('Assets/dark_room_impact.mp3')
 pr.set_sound_volume (dead, 1.0)
 
 # Collision callback
-def on_begin(arbiter, space: pm.Space, data) -> None:
-    global screen
+def on_begin(arbiter, space: pm.Space, data) -> None: # type: ignore
+    global time
     print("DIE")
     print(arbiter.shapes)
-    screen = Screen.LOSE
+    time -= 5*FPS
 
 
 
@@ -71,10 +70,9 @@ pr.set_target_fps(FPS)
 
 pr.set_exit_key(pr.KeyboardKey.KEY_NULL)
 
-flashlight = pr.load_texture("Assets/flashlight2.png")
 
 screen = Screen.TITLE
-time = 60*FPS
+time = SECONDS*FPS
 play_button = 0
 settings_button = 0
 quit_button = 0   
@@ -104,7 +102,7 @@ diffuculty_options_list = difficulty_options.split(";")
 def reset() -> None:
     global screen, play_button, time, settings_button, quit_button, resume_button, back_button, frame_move, quit_button_title, maze, space, player_body, player_shape, squares, end_trigger, print_options, difficulty_selection, difficulty_selection_cint, difficulty_edit_mode, diffuculty_options_list
     screen = Screen.TITLE
-    time = 60*FPS
+    time = SECONDS*FPS
     play_button = 0
     settings_button = 0
     quit_button = 0
@@ -130,13 +128,17 @@ def reset() -> None:
     # difficulty_options = "EASY;MID;HARD"
     # diffuculty_options_list = difficulty_options.split(";")
 
+flashlight = pr.load_texture("Assets/flashlight2.png")
+character = pr.load_texture("Assets/Dark_room_ball.png")
+
+
 def input_handling(player_body: pm.Body, player_poly: pm.Circle,) -> None:
     global screen
     if pr.is_key_down(pr.KeyboardKey.KEY_F):
         pr.toggle_fullscreen()
     if pr.is_key_down(pr.KeyboardKey.KEY_ESCAPE) and screen == Screen.GAME:
         screen = Screen.PAUSE
-    if pr.is_key_down(pr.KeyboardKey.KEY_SPACE) and (screen == Screen.WIN or screen == Screen.LOSE):
+    if pr.is_key_down(pr.KeyboardKey.KEY_SPACE) or pr.get_gamepad_button_pressed() and (screen == Screen.WIN or screen == Screen.LOSE):
         reset()
         screen = Screen.GAME
     if pr.is_key_down(pr.KeyboardKey.KEY_W) or pr.is_key_down(pr.KeyboardKey.KEY_UP):
@@ -163,12 +165,6 @@ def input_handling(player_body: pm.Body, player_poly: pm.Circle,) -> None:
         player_body.velocity = Vec2d(-player_body.velocity.x, player_body.velocity.y)
     if player_body.position.x + player_poly.radius >= WINDOWWIDTH:
         player_body.velocity = Vec2d(-player_body.velocity.x, player_body.velocity.y)
-
-
-
-
-
-
 
 while not pr.window_should_close():
     pr.update_music_stream(music)
@@ -200,6 +196,7 @@ while not pr.window_should_close():
 
     if quit_button == 1:
         screen = Screen.TITLE
+        reset()
         quit_button = 0
     
     if resume_button == 1:
@@ -215,7 +212,7 @@ while not pr.window_should_close():
         back_button = 0
     checked = False
 
-    if time == 0:
+    if time <= 0:
         screen = Screen.LOSE
 
 
@@ -229,11 +226,11 @@ while not pr.window_should_close():
 
     match screen:
         case Screen.GAME:
-            pr.draw_circle(round(player_body.position.x), round(-player_body.position.y), player_shape.radius, pr.BLUE)
-            pr.draw_texture(flashlight, round(player_body.position.x - player_shape.radius)+16-800, round(-player_body.position.y - player_shape.radius)+16-600, pr.WHITE)
+            pr.draw_texture(flashlight, round(player_body.position.x - player_shape.radius)+16-800, round(-player_body.position.y - player_shape.radius)+16-600, pr.BLACK)
+            pr.draw_texture_ex(character, Vec2d(round(player_body.position.x - player_shape.radius), round(-player_body.position.y - player_shape.radius)), 0, 0.75, pr.WHITE)
             for poly_box in squares:
                 pr.draw_rectangle(math.ceil(poly_box.position.x - CELL_WIDTH / 2), math.ceil(-poly_box.position.y - CELL_HEIGHT / 2), math.ceil(CELL_WIDTH), math.ceil(CELL_HEIGHT), pr.BLACK)
-            pr.draw_text(f'{time//60}', WINDOWWIDTH//2-30, 80, 60, pr.WHITE)
+            pr.draw_text(f'{time//FPS}', WINDOWWIDTH//2-30, 80, 60, pr.WHITE)
             
 
         case Screen.TITLE:
@@ -260,7 +257,7 @@ while not pr.window_should_close():
             pr.draw_text(f'You win!', 275, 270, 60, pr.WHITE)
             pr.draw_text(f'Press SPACE to play again.', 130, 270+80, 40, pr.WHITE)
             if time == 60:
-                time = 60*FPS
+                time = SECONDS*FPS
 
         case Screen.LOSE:
             pr.draw_rectangle(0, 0, WINDOWWIDTH, WINDOWHEIGHT, pr.BLACK)
