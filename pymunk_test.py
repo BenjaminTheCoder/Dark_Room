@@ -138,7 +138,7 @@ def input_handling(player_body: pm.Body, player_poly: pm.Circle,) -> None:
         pr.toggle_fullscreen()
     if pr.is_key_down(pr.KeyboardKey.KEY_ESCAPE) and screen == Screen.GAME:
         screen = Screen.PAUSE
-    if pr.is_key_down(pr.KeyboardKey.KEY_SPACE) or pr.get_gamepad_button_pressed() and (screen == Screen.WIN or screen == Screen.LOSE):
+    if pr.is_key_down(pr.KeyboardKey.KEY_SPACE) and (screen == Screen.WIN or screen == Screen.LOSE):
         reset()
         screen = Screen.GAME
     if pr.is_key_down(pr.KeyboardKey.KEY_W) or pr.is_key_down(pr.KeyboardKey.KEY_UP):
