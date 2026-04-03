@@ -18,7 +18,6 @@ class Screen(Enum):
 
 global screen, play_button, time, settings_button, quit_button, resume_button, back_button, frame_move, quit_button_title, maze, space, player_body, player_shape, squares, end_trigger, print_options, difficulty_selection, difficulty_selection_cint, difficulty_edit_mode, diffuculty_options_list
 
-
 def make_box(pos: Vec2d, space: pm.Space) -> pm.Body:
     poly_body = pm.Body(body_type=pm.Body.STATIC)
     poly_body.position = pos
@@ -28,12 +27,12 @@ def make_box(pos: Vec2d, space: pm.Space) -> pm.Body:
     space.add(poly_body, polybox)
     return poly_body
 
-def make_maze() -> MazeGenerator:
-    maze = MazeGenerator(width=MAZE_WIDTH, height=MAZE_HEIGHT, seed=None)
+def make_maze(MAZE_WIDTH, MAZE_HEIGHT) -> MazeGenerator: #type: ignore
+    maze = MazeGenerator(MAZE_WIDTH, MAZE_HEIGHT, seed=None)
     maze.generate_maze()
     return maze
 
-def build_maze(maze: MazeGenerator, space: pm.Space) -> list[pm.Body]:
+def build_maze(maze: MazeGenerator, space: pm.Space, CELL_WIDTH, CELL_HEIGHT) -> list[pm.Body]: #type: ignore
     walls: list[pm.Body] = []
     for row in range(0, MAZE_HEIGHT):
         for col in range(0, MAZE_WIDTH):
@@ -70,7 +69,26 @@ pr.set_target_fps(FPS)
 
 pr.set_exit_key(pr.KeyboardKey.KEY_NULL)
 
-
+difficulty_selection = 0
+difficulty_selection_cint = pr.ffi.new("int *", 0)
+difficulty_edit_mode = False
+difficulty_options = "EASY;MID;HARD"
+diffuculty_options_list = difficulty_options.split(";")
+if difficulty_selection == 0:
+    MAZE_WIDTH = MAZE_WIDTH_EASY
+    MAZE_HEIGHT = MAZE_HEIGHT_EASY
+    CELL_WIDTH = CELL_WIDTH_EASY
+    CELL_HEIGHT = CELL_HEIGHT_EASY
+elif difficulty_selection == 1:
+    MAZE_WIDTH = MAZE_WIDTH_MID
+    MAZE_HEIGHT = MAZE_HEIGHT_MID
+    CELL_WIDTH = CELL_WIDTH_MID
+    CELL_HEIGHT = CELL_HEIGHT_MID
+elif difficulty_selection == 2:
+    MAZE_WIDTH = MAZE_WIDTH_HARD
+    MAZE_HEIGHT = MAZE_HEIGHT_HARD
+    CELL_WIDTH = CELL_WIDTH_HARD
+    CELL_HEIGHT = CELL_HEIGHT_HARD
 screen = Screen.TITLE
 time = SECONDS*FPS
 play_button = 0
@@ -80,7 +98,7 @@ resume_button = 0
 quit_button_title = 0
 back_button = 0
 frame_move = True
-maze = make_maze()
+maze = make_maze(MAZE_WIDTH, MAZE_HEIGHT)
 space = pm.Space()
 player_body = pm.Body()
 player_body.position = start_pos = Vec2d(round(CELL_WIDTH*(maze.start_pos[1] + 0.5)), -round(CELL_HEIGHT*(maze.start_pos[0] + 0.5)))
@@ -90,17 +108,30 @@ player_shape.elasticity = ELASTICITY
 player_shape.collision_type = 2
 space.add(player_body, player_shape)
 space.on_collision(1, 2, begin=on_begin)
-squares = build_maze(maze, space)
+squares = build_maze(maze, space, MAZE_WIDTH, MAZE_HEIGHT)
 end_trigger = Vec2d(round(CELL_WIDTH*(maze.end_pos[1] + 0.5)), -round(CELL_HEIGHT*(maze.end_pos[0] + 0.5)))
 print_options = pm.SpaceDebugDrawOptions()
-difficulty_selection = 0
-difficulty_selection_cint = pr.ffi.new("int *", 0)
-difficulty_edit_mode = False
-difficulty_options = "EASY;MID;HARD"
-diffuculty_options_list = difficulty_options.split(";")
 
 def reset() -> None:
-    global screen, play_button, time, settings_button, quit_button, resume_button, back_button, frame_move, quit_button_title, maze, space, player_body, player_shape, squares, end_trigger, print_options, difficulty_selection, difficulty_selection_cint, difficulty_edit_mode, diffuculty_options_list
+    global screen, play_button, time, MAZE_WIDTH, MAZE_HEIGHT,  settings_button, quit_button, resume_button, back_button, frame_move, quit_button_title, maze, space, player_body, player_shape, squares, end_trigger, print_options, difficulty_selection, difficulty_selection_cint, difficulty_edit_mode, diffuculty_options_list
+    if difficulty_selection == 0:
+        print("EEEEEEEEEEAAAAAAAAAAAAASSSSSSSSSYYYYYYYYY")
+        MAZE_WIDTH = MAZE_WIDTH_EASY
+        MAZE_HEIGHT = MAZE_HEIGHT_EASY
+        CELL_WIDTH = CELL_WIDTH_EASY
+        CELL_HEIGHT = CELL_HEIGHT_EASY
+    elif difficulty_selection == 1:
+        print("MMMMMMMMIIIIIIIIIIIIIIDDDDDDDDDD")
+        MAZE_WIDTH = MAZE_WIDTH_MID
+        MAZE_HEIGHT = MAZE_HEIGHT_MID
+        CELL_WIDTH = CELL_WIDTH_MID
+        CELL_HEIGHT = CELL_HEIGHT_MID
+    elif difficulty_selection == 2:
+        print("HHHHHHHHHHHHAAAAAAARRRRRRRRRDDDDDDD")
+        MAZE_WIDTH = MAZE_WIDTH_HARD
+        MAZE_HEIGHT = MAZE_HEIGHT_HARD
+        CELL_WIDTH = CELL_WIDTH_HARD
+        CELL_HEIGHT = CELL_HEIGHT_HARD
     screen = Screen.TITLE
     time = SECONDS*FPS
     play_button = 0
@@ -109,7 +140,7 @@ def reset() -> None:
     resume_button = 0
     quit_button_title = 0
     back_button = 0
-    maze = make_maze()
+    maze = make_maze(MAZE_WIDTH, MAZE_HEIGHT)
     space = pm.Space()
     player_body = pm.Body()
     player_body.position = start_pos = Vec2d(round(CELL_WIDTH*(maze.start_pos[1] + 0.5)), -round(CELL_HEIGHT*(maze.start_pos[0] + 0.5)))
@@ -119,7 +150,7 @@ def reset() -> None:
     player_shape.collision_type = 2
     space.add(player_body, player_shape)
     space.on_collision(1, 2, begin=on_begin)
-    squares = build_maze(maze, space)
+    squares = build_maze(maze, space, CELL_WIDTH, CELL_HEIGHT)
     end_trigger = Vec2d(round(CELL_WIDTH*(maze.end_pos[1] + 0.5)), -round(CELL_HEIGHT*(maze.end_pos[0] + 0.5)))
     print_options = pm.SpaceDebugDrawOptions()
     # difficulty_selection = 0
@@ -130,6 +161,8 @@ def reset() -> None:
 
 flashlight = pr.load_texture("Assets/flashlight2.png")
 character = pr.load_texture("Assets/Dark_room_ball.png")
+
+
 
 
 def input_handling(player_body: pm.Body, player_poly: pm.Circle,) -> None:
@@ -245,6 +278,7 @@ while not pr.window_should_close():
                 difficulty_edit_mode = not difficulty_edit_mode
                 difficulty_selection = int(difficulty_selection_cint[0])
                 print(diffuculty_options_list[difficulty_selection])
+                print(difficulty_selection)
 
 
         case Screen.PAUSE:
