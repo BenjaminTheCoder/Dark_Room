@@ -18,26 +18,26 @@ class Screen(Enum):
 
 global screen, play_button, time, settings_button, quit_button, resume_button, back_button, frame_move, quit_button_title, maze, space, player_body, player_shape, squares, end_trigger, print_options, difficulty_selection, difficulty_selection_cint, difficulty_edit_mode, diffuculty_options_list
 
-def make_box(pos: Vec2d, space: pm.Space) -> pm.Body:
+def make_box(pos: Vec2d, space: pm.Space, cell_width: float, cell_height: float) -> pm.Body:
     poly_body = pm.Body(body_type=pm.Body.STATIC)
     poly_body.position = pos
-    polybox = pm.Poly.create_box(poly_body, (round(CELL_WIDTH), round(CELL_HEIGHT)))
+    polybox = pm.Poly.create_box(poly_body, (round(cell_width), round(cell_height)))
     polybox.elasticity = ELASTICITY
     polybox.collision_type = 1
     space.add(poly_body, polybox)
     return poly_body
 
-def make_maze(MAZE_WIDTH, MAZE_HEIGHT) -> MazeGenerator: #type: ignore
-    maze = MazeGenerator(MAZE_WIDTH, MAZE_HEIGHT, seed=None)
+def make_maze(maze_width: int, maze_height: int) -> MazeGenerator: 
+    maze = MazeGenerator(maze_width, maze_height, seed=None)
     maze.generate_maze()
     return maze
 
-def build_maze(maze: MazeGenerator, space: pm.Space, CELL_WIDTH, CELL_HEIGHT) -> list[pm.Body]: #type: ignore
+def build_maze(maze: MazeGenerator, space: pm.Space, cell_width: float, cell_height: float) -> list[pm.Body]:
     walls: list[pm.Body] = []
-    for row in range(0, MAZE_HEIGHT):
-        for col in range(0, MAZE_WIDTH):
+    for row in range(0, maze_height):
+        for col in range(0, maze_width):
             if maze.maze[row][col] == 1:
-                wall = make_box(Vec2d(col*CELL_WIDTH + CELL_WIDTH // 2, -row*CELL_HEIGHT - CELL_HEIGHT // 2), space)  
+                wall = make_box(Vec2d(col*cell_width + cell_width // 2, -row*cell_height - cell_height // 2), space, cell_width, cell_height)  
                 walls.append(wall)
     return walls
 
@@ -75,20 +75,20 @@ difficulty_edit_mode = False
 difficulty_options = "EASY;MID;HARD"
 diffuculty_options_list = difficulty_options.split(";")
 if difficulty_selection == 0:
-    MAZE_WIDTH = MAZE_WIDTH_EASY
-    MAZE_HEIGHT = MAZE_HEIGHT_EASY
-    CELL_WIDTH = CELL_WIDTH_EASY
-    CELL_HEIGHT = CELL_HEIGHT_EASY
+    maze_width = MAZE_WIDTH_EASY
+    maze_height = MAZE_HEIGHT_EASY
+    cell_width = CELL_WIDTH_EASY
+    cell_height = CELL_HEIGHT_EASY
 elif difficulty_selection == 1:
-    MAZE_WIDTH = MAZE_WIDTH_MID
-    MAZE_HEIGHT = MAZE_HEIGHT_MID
-    CELL_WIDTH = CELL_WIDTH_MID
-    CELL_HEIGHT = CELL_HEIGHT_MID
+    maze_width = MAZE_WIDTH_MID
+    maze_height = MAZE_HEIGHT_MID
+    cell_width = CELL_WIDTH_MID
+    cell_height = CELL_HEIGHT_MID
 elif difficulty_selection == 2:
-    MAZE_WIDTH = MAZE_WIDTH_HARD
-    MAZE_HEIGHT = MAZE_HEIGHT_HARD
-    CELL_WIDTH = CELL_WIDTH_HARD
-    CELL_HEIGHT = CELL_HEIGHT_HARD
+    maze_width = MAZE_WIDTH_HARD
+    maze_height = MAZE_HEIGHT_HARD
+    cell_width = CELL_WIDTH_HARD
+    cell_height = CELL_HEIGHT_HARD
 screen = Screen.TITLE
 time = SECONDS*FPS
 play_button = 0
@@ -98,40 +98,40 @@ resume_button = 0
 quit_button_title = 0
 back_button = 0
 frame_move = True
-maze = make_maze(MAZE_WIDTH, MAZE_HEIGHT)
+maze = make_maze(maze_width, maze_height)
 space = pm.Space()
 player_body = pm.Body()
-player_body.position = start_pos = Vec2d(round(CELL_WIDTH*(maze.start_pos[1] + 0.5)), -round(CELL_HEIGHT*(maze.start_pos[0] + 0.5)))
-player_shape = pm.Circle(player_body, CELL_WIDTH/4)
+player_body.position = start_pos = Vec2d(round(cell_width*(maze.start_pos[1] + 0.5)), -round(cell_height*(maze.start_pos[0] + 0.5)))
+player_shape = pm.Circle(player_body, cell_width/4)
 player_shape.mass = 10
 player_shape.elasticity = ELASTICITY
 player_shape.collision_type = 2
 space.add(player_body, player_shape)
 space.on_collision(1, 2, begin=on_begin)
-squares = build_maze(maze, space, MAZE_WIDTH, MAZE_HEIGHT)
-end_trigger = Vec2d(round(CELL_WIDTH*(maze.end_pos[1] + 0.5)), -round(CELL_HEIGHT*(maze.end_pos[0] + 0.5)))
+squares = build_maze(maze, space, maze_width, maze_height)
+end_trigger = Vec2d(round(cell_width*(maze.end_pos[1] + 0.5)), -round(cell_height*(maze.end_pos[0] + 0.5)))
 print_options = pm.SpaceDebugDrawOptions()
 
 def reset() -> None:
-    global screen, play_button, time, MAZE_WIDTH, MAZE_HEIGHT,  settings_button, quit_button, resume_button, back_button, frame_move, quit_button_title, maze, space, player_body, player_shape, squares, end_trigger, print_options, difficulty_selection, difficulty_selection_cint, difficulty_edit_mode, diffuculty_options_list
+    global screen, play_button, time, maze_width, maze_height, cell_width, cell_height, settings_button, quit_button, resume_button, back_button, frame_move, quit_button_title, maze, space, player_body, player_shape, squares, end_trigger, print_options, difficulty_selection, difficulty_selection_cint, difficulty_edit_mode, diffuculty_options_list
     if difficulty_selection == 0:
         print("EEEEEEEEEEAAAAAAAAAAAAASSSSSSSSSYYYYYYYYY")
-        MAZE_WIDTH = MAZE_WIDTH_EASY
-        MAZE_HEIGHT = MAZE_HEIGHT_EASY
-        CELL_WIDTH = CELL_WIDTH_EASY
-        CELL_HEIGHT = CELL_HEIGHT_EASY
+        maze_width = MAZE_WIDTH_EASY
+        maze_height = MAZE_HEIGHT_EASY
+        cell_width = CELL_WIDTH_EASY
+        cell_height = CELL_HEIGHT_EASY
     elif difficulty_selection == 1:
         print("MMMMMMMMIIIIIIIIIIIIIIDDDDDDDDDD")
-        MAZE_WIDTH = MAZE_WIDTH_MID
-        MAZE_HEIGHT = MAZE_HEIGHT_MID
-        CELL_WIDTH = CELL_WIDTH_MID
-        CELL_HEIGHT = CELL_HEIGHT_MID
+        maze_width = MAZE_WIDTH_MID
+        maze_height = MAZE_HEIGHT_MID
+        cell_width = CELL_WIDTH_MID
+        cell_height = CELL_HEIGHT_MID
     elif difficulty_selection == 2:
         print("HHHHHHHHHHHHAAAAAAARRRRRRRRRDDDDDDD")
-        MAZE_WIDTH = MAZE_WIDTH_HARD
-        MAZE_HEIGHT = MAZE_HEIGHT_HARD
-        CELL_WIDTH = CELL_WIDTH_HARD
-        CELL_HEIGHT = CELL_HEIGHT_HARD
+        maze_width = MAZE_WIDTH_HARD
+        maze_height = MAZE_HEIGHT_HARD
+        cell_width = CELL_WIDTH_HARD
+        cell_height = CELL_HEIGHT_HARD
     screen = Screen.TITLE
     time = SECONDS*FPS
     play_button = 0
@@ -140,18 +140,19 @@ def reset() -> None:
     resume_button = 0
     quit_button_title = 0
     back_button = 0
-    maze = make_maze(MAZE_WIDTH, MAZE_HEIGHT)
+    maze = make_maze(maze_width, maze_height)
     space = pm.Space()
     player_body = pm.Body()
-    player_body.position = start_pos = Vec2d(round(CELL_WIDTH*(maze.start_pos[1] + 0.5)), -round(CELL_HEIGHT*(maze.start_pos[0] + 0.5)))
-    player_shape = pm.Circle(player_body, CELL_WIDTH/4)
+    player_body.position = Vec2d(round(cell_width*(maze.start_pos[1] + 0.5)), -round(cell_height*(maze.start_pos[0] + 0.5)))
+    player_shape = pm.Circle(player_body, (cell_width+cell_height)//2/4)
     player_shape.mass = 10
     player_shape.elasticity = ELASTICITY
     player_shape.collision_type = 2
     space.add(player_body, player_shape)
     space.on_collision(1, 2, begin=on_begin)
-    squares = build_maze(maze, space, CELL_WIDTH, CELL_HEIGHT)
-    end_trigger = Vec2d(round(CELL_WIDTH*(maze.end_pos[1] + 0.5)), -round(CELL_HEIGHT*(maze.end_pos[0] + 0.5)))
+    print(difficulty_selection, maze_width, maze_height, cell_width, cell_height)
+    squares = build_maze(maze, space, cell_width, cell_height)
+    end_trigger = Vec2d(round(cell_width*(maze.end_pos[1] + 0.5)), -round(cell_height*(maze.end_pos[0] + 0.5)))
     print_options = pm.SpaceDebugDrawOptions()
     # difficulty_selection = 0
     # difficulty_selection_cint = pr.ffi.new("int *", 0)
@@ -260,9 +261,11 @@ while not pr.window_should_close():
     match screen:
         case Screen.GAME:
             pr.draw_texture(flashlight, round(player_body.position.x - player_shape.radius)+16-800, round(-player_body.position.y - player_shape.radius)+16-600, pr.BLACK)
-            pr.draw_texture_ex(character, Vec2d(round(player_body.position.x - player_shape.radius), round(-player_body.position.y - player_shape.radius)), 0, 0.75, pr.WHITE)
+            # pr.draw_circle(round(player_body.position.x), round(-player_body.position.y), player_shape.radius, pr.BLUE)
+            pr.draw_texture_ex(character, Vec2d(round(player_body.position.x - player_shape.radius), round(-player_body.position.y - player_shape.radius)), 0, (player_shape.radius * 2)/32, pr.WHITE)
+
             for poly_box in squares:
-                pr.draw_rectangle(math.ceil(poly_box.position.x - CELL_WIDTH / 2), math.ceil(-poly_box.position.y - CELL_HEIGHT / 2), math.ceil(CELL_WIDTH), math.ceil(CELL_HEIGHT), pr.BLACK)
+                pr.draw_rectangle(math.ceil(poly_box.position.x - cell_width / 2), math.ceil(-poly_box.position.y - cell_height / 2), math.ceil(cell_width), math.ceil(cell_height), pr.BLACK)
             pr.draw_text(f'{time//FPS}', WINDOWWIDTH//2-30, 80, 60, pr.WHITE)
             
 
@@ -283,7 +286,7 @@ while not pr.window_should_close():
 
         case Screen.PAUSE:
             resume_button = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, WINDOWHEIGHT/2-BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT), "RESUME")
-            quit_button = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, (WINDOWHEIGHT/2-BUTTON_HEIGHT/2+BUTTON_HEIGHT*1.5), BUTTON_WIDTH, BUTTON_HEIGHT), "QUIT")
+            quit_button = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, (WINDOWHEIGHT/2-BUTTON_HEIGHT/2+BUTTON_HEIGHT*1.5), BUTTON_WIDTH, BUTTON_HEIGHT), "TITLE")
 
 
         case Screen.WIN:
