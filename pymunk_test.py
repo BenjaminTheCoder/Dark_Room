@@ -267,7 +267,8 @@ while not pr.window_should_close():
             for poly_box in squares:
                 pr.draw_rectangle(math.ceil(poly_box.position.x - cell_width / 2), math.ceil(-poly_box.position.y - cell_height / 2), math.ceil(cell_width), math.ceil(cell_height), pr.BLACK)
             pr.draw_text(f'{time//FPS}', WINDOWWIDTH//2-30, 80, 60, pr.WHITE)
-            
+            last_box = squares[-1]
+            pr.draw_rectangle(math.ceil(last_box.position.x - cell_width / 2) - math.ceil(cell_width), math.ceil(-last_box.position.y - cell_height / 2), math.ceil(cell_width), math.ceil(cell_height), pr.DARKGRAY)
 
         case Screen.TITLE:
             play_button = pr.gui_button(pr.Rectangle(WINDOWWIDTH/2-BUTTON_WIDTH/2, WINDOWHEIGHT/2-BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT), "PLAY")
