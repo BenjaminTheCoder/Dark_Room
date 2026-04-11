@@ -47,9 +47,8 @@ pr.init_audio_device()
 music = pr.load_music_stream('Assets/dark_room_music.mp3')
 pr.set_music_volume(music, 0.5)
 pr.play_music_stream(music)
-dead = pr.load_music_stream('Assets/dark_room_impact.mp3')
+dead = pr.load_music_stream('Assets/dark_room_impact_trim.mp3')
 pr.set_music_volume(dead, 1.0)
-impact_length = pr.get_music_time_length(dead)
 
 # Collision callback
 def on_begin(arbiter, space: pm.Space, data) -> None: # type: ignore
@@ -57,6 +56,7 @@ def on_begin(arbiter, space: pm.Space, data) -> None: # type: ignore
     print("DIE")
     # print(arbiter.shapes)
     time -= 5*FPS
+    pr.seek_music_stream(dead, 0.0)
     pr.play_music_stream(dead)
     
 
@@ -201,15 +201,14 @@ def input_handling(player_body: pm.Body, player_poly: pm.Circle,) -> None:
         player_body.velocity = Vec2d(-player_body.velocity.x, player_body.velocity.y)
     if player_body.position.x + player_poly.radius >= WINDOWWIDTH:
         player_body.velocity = Vec2d(-player_body.velocity.x, player_body.velocity.y)
-    
-sound_time = 0
+
+dead_music_length = pr.get_music_time_length(dead)    
 while not pr.window_should_close():
     pr.update_music_stream(music)
-    sound_time += 1
     pr.update_music_stream(dead)
-    if sound_time >= 32:
+    time_played = pr.get_music_time_played(dead) / dead_music_length
+    if time_played > 0.95:
         pr.stop_music_stream(dead)
-        sound_time = 0
     
 
     
